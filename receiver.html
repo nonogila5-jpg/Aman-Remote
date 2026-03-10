@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديد موقع الاستلام</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #eef2f3; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+        .btn-gps { background: #3498db; color: white; padding: 15px; border: none; border-radius: 50px; width: 100%; font-size: 18px; cursor: pointer; margin-top: 20px; }
+        #msg { margin-top: 15px; color: #27ae60; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>أهلاً بك في Aman Delivery 📦</h2>
+    <p>لتوصيل طردك بدقة، يرجى الضغط على الزر لمشاركة موقعك الحالي في الشلف أو وادي سلي.</p>
+    <button class="btn-gps" onclick="updateMyLocation()">📍 إرسال موقعي الآن</button>
+    <p id="msg"></p>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIza...", 
+        authDomain: "aman-audoi.firebaseapp.com",
+        projectId: "aman-audoi",
+        databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com/",
+        storageBucket: "aman-audoi.appspot.com",
+        messagingSenderId: "946545859812",
+        appId: "1:946545859812:web:06fbd35603a1cf68b9a0f1"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('id');
+
+    function updateMyLocation() {
+        if (!orderId) { alert("خطأ: كود الطلب غير موجود"); return; }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                database.ref('shipments/' + orderId).update({
+                    latitude: pos.coords.latitude,
+                    longitude: pos.coords.longitude,
+                    status: "الموقع محدد - جاهز للتوصيل"
+                }).then(() => {
+                    document.getElementById('msg').innerHTML = "✅ شكرًا! تم إرسال موقعك بنجاح.";
+                    alert("تم إرسال إحداثياتك للسائق.");
+                });
+            }, (error) => {
+                alert("يرجى تفعيل الـ GPS في هاتفك.");
+            });
+        }
+    }
+</script>
+</body>
+</html>
