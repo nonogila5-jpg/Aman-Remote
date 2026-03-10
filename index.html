@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Aman Electronics - Pro Remote RS8</title>
+    <style>
+        :root {
+            --orange: #f39c12;
+            --dark-gray: #1a1a1a;
+            --btn-gray: #333333;
+            --led-off: #441111;
+            --led-on: #ff0000;
+        }
+
+        body {
+            margin: 0; padding: 10px; background-color: var(--dark-gray);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; justify-content: center; overflow-x: hidden;
+        }
+
+        .remote-wrapper {
+            background-color: var(--btn-gray);
+            width: 100%; max-width: 360px; padding: 20px;
+            border-radius: 45px; border: 2px solid #444;
+            display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            box-sizing: border-box;
+        }
+
+        /* اللمبة (LED) */
+        .led-indicator {
+            width: 14px; height: 14px; background-color: var(--led-off);
+            border-radius: 50%; margin-bottom: 15px; border: 2px solid #222;
+            transition: 0.1s;
+        }
+        .led-active { background-color: var(--led-on); box-shadow: 0 0 15px var(--led-on); }
+
+        .brand { color: #fff; font-weight: bold; font-size: 22px; margin-bottom: 20px; }
+        .brand span { color: var(--orange); }
+
+        /* خانة الـ IP والـ Port مع الحفظ التلقائي */
+        .ip-input {
+            width: 90%; padding: 12px; background: #000; border: 1px solid var(--orange);
+            border-radius: 10px; color: var(--orange); text-align: center; margin-bottom: 25px;
+            font-size: 16px; font-weight: bold; outline: none; box-sizing: border-box;
+        }
+
+        button {
+            border-radius: 12px; font-weight: bold; color: #fff; background: #222;
+            cursor: pointer; border: none; padding: 15px; margin: 5px;
+            box-shadow: 0 4px 0 #000; transition: 0.05s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:active { transform: translateY(3px); box-shadow: none; background: var(--orange); color: #000; }
+
+        .top-row { display: flex; width: 100%; justify-content: space-around; margin-bottom: 20px; }
+        .pwr { background: #d32f2f; border-radius: 50%; width: 60px; height: 60px; font-size: 20px; padding: 0; }
+
+        .dpad { display: grid; grid-template-areas: ". up ." "left ok right" ". down ."; gap: 12px; margin-bottom: 25px; }
+        .ok-btn { grid-area: ok; background: var(--orange); color: #000; border-radius: 50%; width: 75px; height: 75px; font-size: 18px; }
+
+        /* لوحة الأرقام */
+        .num-pad {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 8px; width: 100%; margin-bottom: 20px;
+        }
+        .num-pad button { padding: 15px; background: #262626; font-size: 18px; border: 1px solid #333; }
+
+        /* أزرار التحكم */
+        .grid-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px; }
+        .btn-ctrl { background: #1a1a1a; padding: 18px; font-size: 16px; }
+
+        /* منطقة البحث المصغرة */
+        .search-area { 
+            width: 100%; border-top: 1px dashed #555; padding-top: 15px; 
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .search-input { 
+            width: 60%; padding: 8px; background: #000; border: 1px solid #666; 
+            border-radius: 8px; color: #fff; margin-bottom: 8px; text-align: center; font-size: 13px; outline: none;
+        }
+        .btn-send { background: var(--orange); color: #000; width: 60%; padding: 10px; font-size: 13px; }
+    </style>
+</head>
+<body onload="checkSavedData()">
+
+<div class="remote-wrapper">
+    <div id="led" class="led-indicator"></div>
+    <div class="brand">Géant <span>RS8 PRO</span></div>
+    
+    <input type="text" id="ipAddress" class="ip-input" placeholder="192.168.1.XX:8080" oninput="autoSave()">
+
+    <div class="top-row">
+        <button style="flex:1" onclick="sendCmd('MENU')">MENU</button>
+        <button class="pwr" onclick="sendCmd('POWER')">🔴</button>
+        <button style="flex:1" onclick="sendCmd('EXIT')">EXIT</button>
+    </div>
+
+    <div class="dpad">
+        <button style="grid-area: up;" onclick="sendCmd('UP')">▲</button>
+        <button style="grid-area: left;" onclick="sendCmd('LEFT')">◀</button>
+        <button class="ok-btn" onclick="sendCmd('OK')">OK</button>
+        <button style="grid-area: right;" onclick="sendCmd('RIGHT')">▶</button>
+        <button style="grid-area: down;" onclick="sendCmd('DOWN')">▼</button>
+    </div>
+
+    <div class="num-pad">
+        <button onclick="sendCmd('1')">1</button><button onclick="sendCmd('2')">2</button><button onclick="sendCmd('3')">3</button>
+        <button onclick="sendCmd('4')">4</button><button onclick="sendCmd('5')">5</button><button onclick="sendCmd('6')">6</button>
+        <button onclick="sendCmd('7')">7</button><button onclick="sendCmd('8')">8</button><button onclick="sendCmd('9')">9</button>
+        <button style="grid-column: 2;" onclick="sendCmd('0')">0</button>
+    </div>
+
+    <div class="grid-buttons">
+        <button class="btn-ctrl" onclick="sendCmd('CH_UP')">CH +</button>
+        <button class="btn-ctrl" onclick="sendCmd('VOL_UP')">VOL +</button>
+        <button class="btn-ctrl" onclick="sendCmd('CH_DOWN')">CH -</button>
+        <button class="btn-ctrl" onclick="sendCmd('VOL_DOWN')">VOL -</button>
+    </div>
+
+    <div class="search-area">
+        <input type="text" id="typeInput" class="search-input" placeholder="بحث...">
+        <button class="btn-send" onclick="sendSearch()">إرسال ⌨️</button>
+    </div>
+</div>
+
+<script>
+    // 1. نظام الذاكرة (Storage System)
+    function autoSave() {
+        const val = document.getElementById('ipAddress').value.trim();
+        localStorage.setItem('aman_remote_ip', val);
+    }
+
+    function checkSavedData() {
+        const savedIP = localStorage.getItem('aman_remote_ip');
+        if (savedIP) {
+            document.getElementById('ipAddress').value = savedIP;
+        }
+    }
+
+    // 2. نظام الوميض (Visual Feedback)
+    function triggerLed() {
+        const led = document.getElementById('led');
+        led.classList.add('led-active');
+        setTimeout(() => led.classList.remove('led-active'), 120);
+    }
+
+    // 3. محرك الإرسال (Command Engine)
+    function sendCmd(key) {
+        const address = document.getElementById('ipAddress').value.trim();
+        
+        // التحقق الصارم: لا وميض ولا إرسال بدون عنوان
+        if (!address) {
+            alert("⚠️ يرجى إدخال عنوان الـ IP والمنفذ (Port) أولاً.");
+            return;
+        }
+
+        triggerLed(); // تومض فقط عند وجود IP
+
+        const endpoint = `http://${address}/send_key?key=${key}`;
+        
+        fetch(endpoint, { mode: 'no-cors' })
+            .then(() => console.log(`Command ${key} dispatched.`))
+            .catch(() => console.log("Network request initiated."));
+
+        if (navigator.vibrate) navigator.vibrate(35);
+    }
+
+    function sendSearch() {
+        const query = document.getElementById('typeInput').value;
+        if (query) {
+            sendCmd('SEARCH_KEY');
+            document.getElementById('typeInput').value = "";
+        }
+    }
+</script>
+
+</body>
+</html>

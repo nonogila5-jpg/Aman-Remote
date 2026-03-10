@@ -1,0 +1,98 @@
+:root {
+    --orange: #f39c12;
+    --dark: #1a1a1a;
+    --btn-bg: #333;
+}
+
+body {
+    background: #000;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+}
+
+.remote-container {
+    background: var(--dark);
+    width: 320px;
+    padding: 20px;
+    border-radius: 40px;
+    border: 3px solid #333;
+    box-shadow: 0 0 30px rgba(243, 156, 18, 0.2);
+    text-align: center;
+}
+
+.brand { color: white; font-weight: bold; margin-bottom: 15px; }
+.brand span { color: var(--orange); }
+
+/* التنسيقات الخاصة بالأزرار */
+button {
+    background: var(--btn-bg);
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+button:active { transform: scale(0.9); background: var(--orange); }
+
+/* لوحة الاتجاهات D-Pad */
+
+.d-pad {
+    display: grid;
+    grid-template-areas: ". up ." "left ok right" ". down .";
+    gap: 10px;
+    margin: 20px auto;
+    width: 150px;
+}
+.up { grid-area: up; height: 50px; }
+.left { grid-area: left; width: 50px; }
+.right { grid-area: right; width: 50px; }
+.down { grid-area: down; height: 50px; }
+.ok { grid-area: ok; background: var(--orange); color: black; border-radius: 50%; }
+
+/* شبكة الأرقام */
+.num-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 20px;
+}
+.num-pad button { padding: 12px; font-size: 18px; }
+
+/* أزرار الصوت والقنوات */
+.vol-ch-grid {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+.col button { display: block; width: 60px; padding: 15px 0; margin: 5px; }
+
+.btn-red { background: #c0392b; font-size: 20px; }
+.ip-section input { width: 80%; padding: 8px; border-radius: 5px; border: none; background: #222; color: var(--orange); text-align: center; }
+.keyboard-box {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #444;
+}
+
+.keyboard-box input {
+    width: 100%;
+    padding: 12px;
+    background: #222;
+    border: 1px solid var(--orange);
+    border-radius: 8px;
+    color: white;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+
+.keyboard-box button {
+    background: #444;
+    color: var(--orange);
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+}
