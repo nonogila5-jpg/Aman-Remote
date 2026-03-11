@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aman Levry - القائمة الكاملة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --p: #e67e22; --d: #2c3e50; --g: #27ae60; --bg: #f8f9fa; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; direction: rtl; }
+        header { background: var(--d); color: white; padding: 20px 15px; text-align: center; border-bottom: 5px solid var(--p); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        header .logo { font-size: 26px; font-weight: bold; }
+        header .logo span { color: var(--p); }
+        .container { padding: 15px; max-width: 480px; margin: auto; }
+        
+        /* شريط الأقسام */
+        .tabs { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
+        .tab { background: white; border: 1.5px solid #ddd; padding: 8px 22px; border-radius: 25px; cursor: pointer; white-space: nowrap; font-family: 'Cairo'; font-weight: bold; }
+        .tab.active { background: var(--p); color: white; border-color: var(--p); }
+
+        /* البطاقات */
+        .card { background: white; border-radius: 18px; margin-bottom: 25px; overflow: hidden; box-shadow: 0 6px 15px rgba(0,0,0,0.06); border: 1px solid #eee; }
+        .card img { width: 100%; height: 180px; object-fit: cover; }
+        .card-body { padding: 15px; }
+        .card-body h2 { margin: 0; font-size: 19px; color: var(--d); }
+        .price-line { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .price { font-size: 20px; font-weight: bold; color: var(--g); }
+        .btn-order { background: var(--p); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; }
+
+        /* النافذة المنبثقة */
+        #orderModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; backdrop-filter: blur(5px); }
+        .modal-box { background: white; margin: 15% auto; padding: 25px; width: 85%; border-radius: 25px; text-align: center; }
+        input { width: 100%; box-sizing: border-box; padding: 14px; margin: 10px 0; border: 1.5px solid #eee; border-radius: 12px; font-family: 'Cairo'; font-size: 16px; }
+        .gps-box { background: #f9f9f9; padding: 15px; border-radius: 15px; margin: 15px 0; border: 2px dashed var(--p); }
+        #gBtn { background: var(--d); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-family: 'Cairo'; }
+        .btn-confirm { width: 100%; padding: 16px; background: var(--g); color: white; border: none; border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Aman <span>Levry</span> 🍕</div>
+        <p>قائمة الطعام الرسمية - وادي سلي</p>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="filterCat('all', this)">الكل</button>
+            <button class="tab" onclick="filterCat('pizza', this)">بيتزا 🍕</button>
+            <button class="tab" onclick="filterCat('sand', this)">صندويش 🥪</button>
+        </div>
+
+        <div id="menu-container"></div>
+
+        <div id="orderModal">
+            <div class="modal-box">
+                <h3 id="itemName" style="color:var(--p); margin-top:0;"></h3>
+                <input type="text" id="cName" placeholder="اسمك الكامل">
+                <input type="tel" id="cPhone" placeholder="رقم هاتفك">
+                <div class="gps-box">
+                    <button onclick="getLoc()" id="gBtn">📍 تحديد موقعي الحالي</button>
+                    <p id="gStat" style="font-size:12px; margin-top:8px; color:#666;">اضغط لتحديد الموقع</p>
+                </div>
+                <button class="btn-confirm" id="finalBtn" onclick="sendIt()">إرسال الطلب ✅</button>
+                <button onclick="closeGo()" style="background:none; border:none; color:red; margin-top:10px; text-decoration:underline; cursor:pointer;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // مصفوفة البيانات (تم تصحيحها بالكامل)
+        const menuData = [
+            { name: "بيتزا مارغريتا", price: "800 دج", cat: "pizza", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500" },
+            { name: "بيتزا تونة ملكية", price: "950 دج", cat: "pizza", img: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500" },
+            { name: "بيتزا فور سيزون", price: "1100 دج", cat: "pizza", img: "https://images.unsplash.com/photo-1593504049359-74330189a345?w=500" },
+            { name: "صندويش كفتة مشوية", price: "450 دج", cat: "sand", img: "https://images.unsplash.com/photo-1567234665766-49ad375053b5?w=500" },
+            { name: "صندويش دجاج كريسبي", price: "400 دج", cat: "sand", img: "https://images.unsplash.com/photo-1521390188846-e2a3a97453a0?w=500" },
+            { name: "شاورما عربي سبيسيال", price: "350 دج", cat: "sand", img: "https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=500" },
+            { name: "تاكوس Aman الملكي", price: "600 دج", cat: "sand", img: "https://images.unsplash.com/photo-1509722747041-619f3830c33d?w=500" },
+            { name: "صندويش كبدة مشرملة", price: "500 دج", cat: "sand", img: "https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=500" }
+        ];
+
+        let loc = null;
+        const dbURL = "https://aman-audoi-default-rtdb.firebaseio.com/orders.json";
+
+        function renderMenu(filter = "all") {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = "";
+            const items = filter === "all" ? menuData : menuData.filter(i => i.cat === filter);
+            
+            items.forEach(item => {
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${item.img}" alt="${item.name}">
+                        <div class="card-body">
+                            <h2>${item.name}</h2>
+                            <div class="price-line">
+                                <span class="price">${item.price}</span>
+                                <button class="btn-order" onclick="openGo('${item.name}')">اطلب الآن</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function filterCat(cat, btn) {
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderMenu(cat);
+        }
+
+        function openGo(n) {
+            document.getElementById('orderModal').style.display = 'block';
+            document.getElementById('itemName').innerText = "طلب: " + n;
+        }
+
+        function closeGo() { document.getElementById('orderModal').style.display = 'none'; }
+
+        function getLoc() {
+            const s = document.getElementById('gStat');
+            navigator.geolocation.getCurrentPosition(p => {
+                loc = { lat: p.coords.latitude, lon: p.coords.longitude };
+                s.innerText = "✅ تم تحديد موقعك"; s.style.color = "green";
+                document.getElementById('gBtn').style.background = "#27ae60";
+            }, () => { alert("يرجى تفعيل GPS"); });
+        }
+
+        async function sendIt() {
+            const n = document.getElementById('cName').value;
+            const p = document.getElementById('cPhone').value;
+            const item = document.getElementById('itemName').innerText;
+            const btn = document.getElementById('finalBtn');
+
+            if(!n || !p || !loc) { alert("أكمل البيانات وحدد موقعك!"); return; }
+
+            btn.disabled = true; btn.innerText = "جاري الإرسال...";
+            const order = { customerName: n, phone: p, orderItem: item, location: loc, time: new Date().toLocaleString() };
+
+            try {
+                const res = await fetch(dbURL, { method: 'POST', body: JSON.stringify(order) });
+                if(res.ok) { alert("شكراً! تم إرسال طلبك."); closeGo(); }
+                else { alert("خطأ في الشبكة"); }
+            } catch (e) { alert("فشل الاتصال"); }
+            finally { btn.disabled = false; btn.innerText = "إرسال الطلب ✅"; }
+        }
+
+        window.onload = () => renderMenu();
+    </script>
+</body>
+      </html>
