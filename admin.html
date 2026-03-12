@@ -9,44 +9,51 @@
         :root { --p: #e67e22; --d: #2c3e50; --g: #27ae60; --r: #e74c3c; --bl: #3498db; }
         body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; direction: rtl; }
         
-        /* الهيدر المحدث مع الشعار */
         header { 
-            background: var(--d); 
-            color: white; 
-            padding: 20px 15px; 
-            text-align: center; 
-            border-bottom: 4px solid var(--p); 
-            position: sticky; 
-            top: 0; 
-            z-index: 1000; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            background: var(--d); color: white; padding: 20px 15px; text-align: center; 
+            border-bottom: 4px solid var(--p); position: sticky; top: 0; z-index: 1000; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center;
         }
-        header .title { 
-            font-family: 'Poppins', sans-serif; 
-            font-size: 20px; 
-            letter-spacing: 1px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 10px; /* مسافة بين الشعار والنص */
+        header .title { font-family: 'Poppins', sans-serif; font-size: 18px; flex-grow: 1; }
+        
+        .settings-icon { font-size: 24px; cursor: pointer; transition: 0.3s; padding: 5px; }
+        .settings-icon:hover { transform: rotate(90deg); color: var(--p); }
+
+        #settings-panel { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; 
         }
-        header .title .pizza-logo { font-size: 24px; } /* حجم الشعار */
-        header .subtitle { font-size: 12px; color: var(--p); font-weight: bold; margin-top: 5px; opacity: 0.9; }
+        .panel-content { 
+            background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
+        }
+        .close-panel { position: absolute; top: 10px; left: 15px; font-size: 20px; cursor: pointer; color: var(--r); font-weight: bold; }
 
         .container { padding: 10px; max-width: 500px; margin: auto; }
         
         #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { background: var(--p); color: white; border: none; padding: 18px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4); }
+        #start-btn { background: var(--p); color: white; border: none; padding: 18px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; }
 
-        .driver-manager { background: white; margin-bottom: 15px; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 5px solid var(--bl); }
-        .input-row { display: flex; gap: 5px; margin-top: 10px; }
-        input { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Cairo'; flex: 1; }
-        .driver-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-family: 'Cairo'; font-weight: bold; margin-bottom: 10px; background: #f9f9f9; }
+        .driver-manager { background: #f9f9f9; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-top: 10px; }
+        
+        /* التعديل هنا لجعل المربعات متناسقة */
+        .input-row { display: flex; gap: 10px; margin-top: 10px; }
+        input { 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #ddd; 
+            font-family: 'Cairo'; 
+            flex: 1; 
+            font-size: 14px; 
+            width: 0; /* لضمان التساوي التام في التمدد داخل flex */
+            box-sizing: border-box;
+        }
+
+        .driver-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-family: 'Cairo'; font-weight: bold; margin-bottom: 10px; background: white; }
         
         .btn { padding: 10px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; color: white; display: inline-block; font-size: 13px; transition: 0.3s; }
-        .btn:active { transform: scale(0.95); }
-        .btn-add { background: var(--g); width: 100%; margin-top: 5px; }
-        .btn-del { background: var(--r); padding: 5px 10px; font-size: 11px; }
+        .btn-add { background: var(--g); width: 100%; margin-top: 10px; height: 45px; }
+        .btn-del { background: var(--r); width: 100%; margin-bottom: 10px; }
         .btn-call-team { background: var(--bl); flex: 1; }
         .btn-track-team { background: var(--d); flex: 1; }
 
@@ -64,41 +71,43 @@
 
 <div id="start-overlay">
     <div style="font-family: 'Poppins'; font-size: 24px; margin-bottom: 10px;">AMAN ELECTRONICS</div>
-    <p>Système de Gestion Propriétaire</p>
     <button id="start-btn" onclick="startAdmin()">ACTIVER LE SYSTÈME 🔔</button>
 </div>
 
 <header>
-    <div class="title">
-        <span class="pizza-logo">🍕</span> Espace Propriétaire
-    </div>
-    <span class="subtitle">Gestion Premium & Suivi en Direct</span>
+    <div class="settings-icon" onclick="toggleSettings()">⚙️</div>
+    <div class="title">🍕 Espace Propriétaire</div>
+    <div style="width: 30px;"></div> 
 </header>
 
-<audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+<div id="settings-panel">
+    <div class="panel-content">
+        <span class="close-panel" onclick="toggleSettings()">✕</span>
+        <h3 style="text-align:center; margin-top:0;">⚙️ إعدادات السائقين</h3>
+        
+        <div class="driver-manager">
+            <b style="font-size: 12px;">إدارة السائقين الحاليين:</b>
+            <select id="driverList" class="driver-select" onchange="switchDriver()"></select>
+            <button class="btn btn-del" onclick="deleteCurrentDriver()">طرد وحذف السائق</button>
+            
+            <div style="display: flex; gap: 8px;">
+                <a id="callBtn" href="tel:" class="btn btn-call-team">📞 إتصال</a>
+                <button class="btn btn-track-team" onclick="trackDriver()">🚚 تتبع</button>
+            </div>
+        </div>
+
+        <div class="driver-manager" style="border-top: 3px solid var(--g);">
+            <b style="font-size: 12px;">➕ إضافة سائق جديد:</b>
+            <div class="input-row">
+                <input type="text" id="newName" placeholder="الاسم">
+                <input type="tel" id="newPhone" placeholder="الهاتف">
+            </div>
+            <button class="btn btn-add" onclick="addNewDriver()">حفظ ومنح الصلاحية</button>
+        </div>
+    </div>
+</div>
 
 <div class="container">
-    <div class="driver-manager">
-        <b style="font-size: 14px;">👥 قائمة السائقين النشطين:</b>
-        <div style="display:flex; gap:5px; align-items:center; margin-top:5px;">
-            <select id="driverList" class="driver-select" onchange="switchDriver()"></select>
-            <button class="btn btn-del" onclick="deleteCurrentDriver()">حذف</button>
-        </div>
-
-        <div style="display: flex; gap: 8px;">
-            <a id="callBtn" href="tel:" class="btn btn-call-team">📞 إتصال</a>
-            <button class="btn btn-track-team" onclick="trackDriver()">🚚 تتبع</button>
-        </div>
-
-        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-        <b style="font-size: 13px; color: var(--bl);">➕ إضافة سائق جديد:</b>
-        <div class="input-row">
-            <input type="text" id="newName" placeholder="اسم السائق">
-            <input type="tel" id="newPhone" placeholder="رقم الهاتف">
-        </div>
-        <button class="btn btn-add" onclick="addNewDriver()">حفظ السائق في القائمة</button>
-    </div>
-
     <div id="orders-list"></div>
 </div>
 
@@ -109,7 +118,7 @@
     </div>
     <div id="chatMessages"></div>
     <div style="padding:10px; display:flex; gap:5px; border-top:1px solid #eee;">
-        <input type="text" id="msgInput" placeholder="رسالة للسائق...">
+        <input type="text" id="msgInput" placeholder="رسالة...">
         <button onclick="sendMsg()" style="background:var(--p); color:white; border:none; border-radius:50%; width:35px;">⬅️</button>
     </div>
 </div>
@@ -124,37 +133,48 @@
     function startAdmin() {
         document.getElementById('start-overlay').style.display = 'none';
         const audio = document.getElementById('alertSound');
-        audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
+        audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(e=>{});
         renderDriverList();
         fetchOrders();
         setInterval(fetchOrders, 4000);
         setInterval(loadChat, 3000);
     }
 
+    function toggleSettings() {
+        const panel = document.getElementById('settings-panel');
+        panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
+    }
+
     function renderDriverList() {
         const select = document.getElementById('driverList');
         select.innerHTML = drivers.length ? "" : "<option value=''>لا يوجد سائقين</option>";
         drivers.forEach((d, index) => {
-            select.innerHTML += `<option value="${d.phone}" data-index="${index}">${d.name}</option>`;
+            select.innerHTML += `<option value="${d.phone}">${d.name}</option>`;
         });
         switchDriver();
     }
 
-    function addNewDriver() {
-        const name = document.getElementById('newName').value;
-        const phone = document.getElementById('newPhone').value;
-        if(!name || !phone) return alert("أدخل الاسم والرقم!");
+    async function addNewDriver() {
+        const name = document.getElementById('newName').value.trim();
+        const phone = document.getElementById('newPhone').value.trim();
+        if(!name || !phone) return alert("أدخل البيانات!");
+        
+        await fetch(`${dbBase}/auth_drivers/${name}.json`, { method: 'PUT', body: JSON.stringify({ access: "granted" }) });
+
         drivers.push({ name, phone });
         localStorage.setItem('amanDrivers', JSON.stringify(drivers));
         document.getElementById('newName').value = "";
         document.getElementById('newPhone').value = "";
         renderDriverList();
+        alert("تمت الإضافة ✅");
     }
 
-    function deleteCurrentDriver() {
+    async function deleteCurrentDriver() {
         const select = document.getElementById('driverList');
         if(select.selectedIndex < 0 || drivers.length === 0) return;
-        if(confirm("هل تريد حذف هذا السائق؟")) {
+        const name = select.options[select.selectedIndex].text;
+        if(confirm(`طرد وحذف ${name}؟`)) {
+            await fetch(`${dbBase}/auth_drivers/${name}.json`, { method: 'DELETE' });
             drivers.splice(select.selectedIndex, 1);
             localStorage.setItem('amanDrivers', JSON.stringify(drivers));
             renderDriverList();
@@ -163,9 +183,8 @@
 
     function switchDriver() {
         const select = document.getElementById('driverList');
-        if(drivers.length > 0) {
-            const phone = select.value;
-            document.getElementById('callBtn').href = "tel:" + phone;
+        if(drivers.length > 0 && select.value !== "") {
+            document.getElementById('callBtn').href = "tel:" + select.value;
             document.getElementById('chatTitle').innerText = "دردشة: " + select.options[select.selectedIndex].text;
             loadChat();
         }
@@ -179,11 +198,8 @@
             if (currentHash === lastOrdersHash) return;
             const container = document.getElementById('orders-list');
             if (!data) {
-                container.innerHTML = "<p style='text-align:center;'>لا توجد طلبات حالياً</p>";
+                container.innerHTML = "<p style='text-align:center; margin-top:50px; color:#999;'>لا توجد طلبات</p>";
                 lastOrdersHash = currentHash; return;
-            }
-            if (!isInit && Object.keys(data).length > (lastOrdersHash !== "null" ? Object.keys(JSON.parse(lastOrdersHash)).length : 0)) {
-                document.getElementById('alertSound').play();
             }
             container.innerHTML = "";
             Object.keys(data).reverse().forEach(id => {
@@ -192,15 +208,15 @@
                     <div class="order-card">
                         <b>👤 ${o.customerName}</b>
                         <p>🍕 الطلب: <span style="color:var(--p)">${o.orderItem}</span></p>
-                        <div style="display:flex; gap:5px;">
-                            <a href="tel:${o.phone}" class="btn" style="background:var(--g); flex:1;">اتصال بالزبون</a>
+                        <div style="display:flex; gap:5px; margin-top:10px;">
+                            <a href="tel:${o.phone}" class="btn" style="background:var(--g); flex:1;">إتصال</a>
                             <a href="https://www.google.com/maps?q=${o.location.lat},${o.location.lon}" target="_blank" class="btn" style="background:var(--d); flex:1;">الموقع 📍</a>
                         </div>
                         <button class="btn" style="background:var(--r); width:100%; margin-top:10px;" onclick="deleteOrder('${id}')">تم التوصيل ✅</button>
                     </div>`;
             });
-            lastOrdersHash = currentHash; isInit = false;
-        } catch (e) { console.log("Error"); }
+            lastOrdersHash = currentHash;
+        } catch (e) {}
     }
 
     async function trackDriver() {
@@ -210,7 +226,7 @@
         const res = await fetch(`${dbBase}/drivers/${name}/location.json`);
         const loc = await res.json();
         if(loc) window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lon}`, '_blank');
-        else alert("GPS السائق غير نشط");
+        else alert("GPS غير نشط");
     }
 
     async function sendMsg() {
@@ -240,14 +256,15 @@
 
     function toggleChat() { 
         const b = document.getElementById('chatBox'); 
-        b.style.display = b.style.display === 'flex' ? 'none' : 'flex'; 
+        b.style.display = (b.style.display === 'flex') ? 'none' : 'flex'; 
     }
 
     async function deleteOrder(id) { if(confirm("حذف الطلب؟")) { await fetch(`${dbBase}/orders/${id}.json`, { method: 'DELETE' }); fetchOrders(); } }
     async function clearChat() { 
         const name = document.getElementById('driverList').options[document.getElementById('driverList').selectedIndex].text;
-        if(confirm("مسح؟")) { await fetch(`${dbBase}/chats/${name}.json`, { method: 'DELETE' }); loadChat(); } 
+        await fetch(`${dbBase}/chats/${name}.json`, { method: 'DELETE' }); loadChat(); 
     }
 </script>
+<audio id="alertSound" src="alert.mp3" preload="auto"></audio>
 </body>
-                                                                </html>
+        </html>
