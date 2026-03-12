@@ -10,94 +10,108 @@
         body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; }
         header { background: var(--d); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--p); position: sticky; top: 0; z-index: 1000; }
         .container { padding: 10px; max-width: 500px; margin: auto; }
-        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-right: 6px solid var(--p); }
-        .btn { padding: 12px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; color: white; display: inline-block; font-size: 13px; text-align: center; text-decoration: none; }
+        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-right: 6px solid var(--p); position: relative; }
+        .btn { padding: 12px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; color: white; display: inline-block; font-size: 13px; }
         .btn-call { background: var(--g); } .btn-map { background: var(--d); } .btn-done { background: var(--r); width: 100%; margin-top: 10px; }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .time-badge { font-size: 11px; color: #888; display: block; margin-top: 5px; }
         
-        /* حل مشكلة الرمش: شاشة البدء ضرورية لمرة واحدة فقط */
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        #start-btn { background: var(--p); color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; cursor: pointer; }
+        /* واجهة البدء لفتح قناة الصوت */
+        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        #start-btn { background: var(--p); color: white; border: none; padding: 18px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
 
-<div id="start-screen">
-    <h2>تفعيل نظام التنبيهات 🔔</h2>
-    <button id="start-btn" onclick="initAdmin()">دخول لوحة التحكم</button>
+<div id="start-overlay">
+    <div style="font-size: 60px; margin-bottom: 10px;">🔔</div>
+    <h2 style="margin: 0 0 10px 0;">نظام إدارة Aman</h2>
+    <p style="padding: 0 20px;">اضغط لتفعيل استقبال الطلبات وجرس التنبيه</p>
+    <button id="start-btn" onclick="startSystem()">تشغيل النظام الآن</button>
 </div>
 
 <header>
     <div style="font-size: 18px; font-weight: bold;">📦 إدارة Aman Electronics</div>
 </header>
 
-<audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" preload="auto"></audio>
+<audio id="notifSound" src="alert.mp3" preload="auto"></audio>
 
 <div class="container">
     <div id="orders-list"></div>
 </div>
 
 <script>
-    const dbURL = "https://aman-audoi-default-rtdb.firebaseio.com/orders";
-    let lastOrderCount = 0;
-    let isInitialLoad = true;
+    const dbURL = "https://aman-audoi-default-rtdb.firebaseio.com/orders.json";
+    let lastDataString = ""; 
+    let isFirstRun = true;
 
-    function initAdmin() {
-        document.getElementById('start-screen').style.display = 'none';
-        const audio = document.getElementById('alertSound');
-        audio.play().then(() => { audio.pause(); audio.currentTime = 0; }); // تفعيل الصوت
-        loadOrders();
-        setInterval(loadOrders, 5000); // تحديث كل 5 ثوانٍ
+    function startSystem() {
+        document.getElementById('start-overlay').style.display = 'none';
+        const audio = document.getElementById('notifSound');
+        // تفعيل الصوت برمجياً عبر تشغيل وإيقاف سريع
+        audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(e => console.log("Audio ready"));
+        
+        updateOrders();
+        setInterval(updateOrders, 4000); // تحديث كل 4 ثوانٍ
     }
 
-    async function loadOrders() {
+    async function updateOrders() {
         try {
-            const res = await fetch(dbURL + ".json");
-            const data = await res.json();
+            const response = await fetch(dbURL);
+            const data = await response.json();
+            
+            // تحويل البيانات الحالية لنص للمقارنة مع الحالة السابقة
+            const currentDataString = JSON.stringify(data);
+
+            // إذا لم يتغير شيء، اخرج فوراً (هذا يمنع الرمشة)
+            if (currentDataString === lastDataString) return;
+
             const container = document.getElementById('orders-list');
             
             if (!data) {
-                container.innerHTML = "<p style='text-align:center;'>لا توجد طلبات حالياً</p>";
-                lastOrderCount = 0;
+                container.innerHTML = "<p style='text-align:center; margin-top:20px;'>لا توجد طلبات حالياً</p>";
+                lastDataString = currentDataString;
                 return;
             }
 
-            const currentKeys = Object.keys(data);
-            const currentCount = currentKeys.length;
+            // إذا كان هناك طلب جديد (زيادة في عدد العناصر) وليس المرة الأولى التي يفتح فيها التطبيق
+            const currentCount = Object.keys(data).length;
+            const lastCount = lastDataString && lastDataString !== "null" ? Object.keys(JSON.parse(lastDataString)).length : 0;
 
-            // تنبيه صوتي عند وجود طلب جديد فقط
-            if (currentCount > lastOrderCount && !isInitialLoad) {
-                document.getElementById('alertSound').play().catch(e => console.log("الصوت يحتاج تفاعل"));
+            if (currentCount > lastCount && !isFirstRun) {
+                document.getElementById('notifSound').play().catch(err => console.log("خطأ في تشغيل الصوت"));
             }
 
-            // تحديث الواجهة فقط إذا تغير عدد الطلبات (لحذف الرمشة)
-            if (currentCount !== lastOrderCount || isInitialLoad) {
-                container.innerHTML = "";
-                currentKeys.reverse().forEach(id => {
-                    const o = data[id];
-                    const mapURL = `https://www.google.com/maps?q=${o.location.lat},${o.location.lon}`;
-                    container.innerHTML += `
-                        <div class="order-card">
-                            <b>👤 ${o.customerName}</b>
-                            <p>🍕 الطلب: <span style="color:var(--p)">${o.orderItem}</span></p>
-                            <div class="actions">
-                                <a href="tel:${o.phone}" class="btn btn-call">اتصال</a>
-                                <a href="${mapURL}" target="_blank" class="btn btn-map">الموقع</a>
-                            </div>
-                            <button class="btn btn-done" onclick="deleteOrder('${id}')">تم التوصيل (حذف) ✅</button>
-                        </div>`;
-                });
-            }
+            // بناء الواجهة فقط عند التغيير الحقيقي
+            container.innerHTML = "";
+            Object.keys(data).reverse().forEach(id => {
+                const o = data[id];
+                const maps = `https://www.google.com/maps?q=${o.location.lat},${o.location.lon}`;
+                container.innerHTML += `
+                    <div class="order-card">
+                        <b style="font-size:16px;">👤 ${o.customerName}</b>
+                        <p style="margin:8px 0;">🍕 الطلب: <span style="color:var(--p); font-weight:bold;">${o.orderItem}</span></p>
+                        <span class="time-badge">⏰ ${o.time || 'منذ قليل'}</span>
+                        <div class="actions">
+                            <a href="tel:${o.phone}" class="btn btn-call">اتصال بالزبون</a>
+                            <a href="${maps}" target="_blank" class="btn btn-map">فتح الموقع📍</a>
+                        </div>
+                        <button class="btn btn-done" onclick="completeOrder('${id}')">تم التوصيل (حذف من القائمة) ✅</button>
+                    </div>`;
+            });
 
-            lastOrderCount = currentCount;
-            isInitialLoad = false;
-        } catch (e) { console.error("خطأ في الاتصال"); }
+            lastDataString = currentDataString;
+            isFirstRun = false;
+
+        } catch (error) {
+            console.error("Firebase connection error");
+        }
     }
 
-    async function deleteOrder(id) {
-        if(confirm("هل تم التوصيل؟")) {
-            await fetch(`${dbURL}/${id}.json`, { method: 'DELETE' });
-            loadOrders();
+    async function completeOrder(id) {
+        if(confirm("هل تريد تأكيد حذف هذا الطلب؟")) {
+            await fetch(`https://aman-audoi-default-rtdb.firebaseio.com/orders/${id}.json`, { method: 'DELETE' });
+            updateOrders();
         }
     }
 </script>
