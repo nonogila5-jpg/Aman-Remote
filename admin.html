@@ -7,84 +7,47 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root { --p: #e67e22; --d: #2c3e50; --g: #27ae60; --r: #e74c3c; --bl: #3498db; }
-        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; direction: rtl; }
+        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; }
         header { background: var(--d); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--p); position: sticky; top: 0; z-index: 1000; }
         .container { padding: 10px; max-width: 500px; margin: auto; }
-        .track-bar { background: white; margin: 10px; padding: 12px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
-        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-right: 6px solid var(--p); animation: slideIn 0.3s ease; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-        .btn { padding: 12px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; color: white; display: inline-block; font-size: 13px; }
-        .btn-track { background: var(--bl); width: 100%; margin-bottom: 10px; }
-        .btn-call { background: var(--g); } .btn-map { background: var(--d); } .btn-done { background: var(--r); grid-column: span 2; width: 100%; margin-top: 10px; }
+        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-right: 6px solid var(--p); }
+        .btn { padding: 12px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; color: white; display: inline-block; font-size: 13px; text-align: center; text-decoration: none; }
+        .btn-call { background: var(--g); } .btn-map { background: var(--d); } .btn-done { background: var(--r); width: 100%; margin-top: 10px; }
         .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
         
-        /* واجهة البدء لتفعيل الصوت */
-        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { background: var(--p); color: white; border: none; padding: 20px 40px; border-radius: 50px; font-size: 22px; font-weight: bold; cursor: pointer; margin-top: 20px; box-shadow: 0 0 20px rgba(230, 126, 34, 0.5); }
-
-        /* الدردشة */
-        #chatBox { display:none; position:fixed; bottom:90px; right:20px; width:300px; height:400px; background:white; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.2); z-index:2000; flex-direction:column; overflow:hidden; border: 1px solid var(--p); }
-        #chatMessages { flex:1; padding:10px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; background:#fdfdfd; }
-        .msg { padding: 8px 12px; border-radius: 15px; max-width: 80%; font-size: 13px; }
-        .msg-admin { align-self: flex-end; background: var(--p); color: white; }
-        .msg-driver { align-self: flex-start; background: #eee; color: #333; }
-        .chat-toggle { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--p); color:white; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.3); font-size:24px; z-index:2000; }
+        /* حل مشكلة الرمش: شاشة البدء ضرورية لمرة واحدة فقط */
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #start-btn { background: var(--p); color: white; border: none; padding: 15px 30px; border-radius: 30px; font-size: 18px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <div style="font-size: 50px;">📦</div>
-    <h2>Aman Electronics - الإدارة</h2>
-    <p>اضغط للبدء وتفعيل تنبيهات الطلبات الجديدة</p>
-    <button id="start-btn" onclick="initAdmin()">دخول النظام 🔔</button>
+    <h2>تفعيل نظام التنبيهات 🔔</h2>
+    <button id="start-btn" onclick="initAdmin()">دخول لوحة التحكم</button>
 </div>
 
 <header>
-    <div style="font-size: 20px; font-weight: bold;">📦 إدارة Aman Electronics</div>
+    <div style="font-size: 18px; font-weight: bold;">📦 إدارة Aman Electronics</div>
 </header>
 
 <audio id="alertSound" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" preload="auto"></audio>
 
 <div class="container">
-    <div class="track-bar">
-        <button class="btn btn-track" onclick="trackDriverLive()">🚚 أين السائق الآن؟ (تتبع حي)</button>
-        <small id="track-status" style="color: #888;">لم يتم جلب موقع السائق بعد</small>
-    </div>
     <div id="orders-list"></div>
 </div>
 
-<div id="chatBox">
-    <div style="background:var(--p); color:white; padding:10px; display:flex; justify-content:space-between;">
-        <b>الدردشة مع السائق</b>
-        <button onclick="clearChat()" style="background:none; border:none; color:white; font-size:10px; cursor:pointer;">مسح</button>
-    </div>
-    <div id="chatMessages"></div>
-    <div style="padding:10px; display:flex; gap:5px; border-top:1px solid #eee;">
-        <input type="text" id="msgInput" placeholder="اكتب ردك..." style="flex:1; border:1px solid #ddd; border-radius:20px; padding:8px 15px;">
-        <button onclick="sendMsg()" style="background:var(--p); color:white; border:none; border-radius:50%; width:35px;">⬅️</button>
-    </div>
-</div>
-<button class="chat-toggle" onclick="toggleChat()">💬</button>
-
 <script>
     const dbURL = "https://aman-audoi-default-rtdb.firebaseio.com/orders";
-    const chatURL = "https://aman-audoi-default-rtdb.firebaseio.com/chat";
-    const trackURL = "https://aman-audoi-default-rtdb.firebaseio.com/driver_location.json";
-    
     let lastOrderCount = 0;
     let isInitialLoad = true;
 
-    // تفعيل النظام بعد الضغط على زر الدخول
     function initAdmin() {
         document.getElementById('start-screen').style.display = 'none';
-        // تشغيل صوت صامت لفتح قناة الصوت في المتصفح
         const audio = document.getElementById('alertSound');
-        audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
-        
+        audio.play().then(() => { audio.pause(); audio.currentTime = 0; }); // تفعيل الصوت
         loadOrders();
-        setInterval(loadOrders, 5000); // فحص الطلبات كل 5 ثوانٍ
-        setInterval(loadMsgs, 3000);  // تحديث الدردشة كل 3 ثوانٍ
+        setInterval(loadOrders, 5000); // تحديث كل 5 ثوانٍ
     }
 
     async function loadOrders() {
@@ -93,86 +56,50 @@
             const data = await res.json();
             const container = document.getElementById('orders-list');
             
-            if(!data) { 
-                container.innerHTML = "<p style='text-align:center;'>لا توجد طلبات</p>"; 
+            if (!data) {
+                container.innerHTML = "<p style='text-align:center;'>لا توجد طلبات حالياً</p>";
                 lastOrderCount = 0;
-                return; 
+                return;
             }
 
             const currentKeys = Object.keys(data);
             const currentCount = currentKeys.length;
 
-            // إذا زاد عدد الطلبات عن آخر مرة، شغل التنبيه
+            // تنبيه صوتي عند وجود طلب جديد فقط
             if (currentCount > lastOrderCount && !isInitialLoad) {
-                document.getElementById('alertSound').play();
+                document.getElementById('alertSound').play().catch(e => console.log("الصوت يحتاج تفاعل"));
+            }
+
+            // تحديث الواجهة فقط إذا تغير عدد الطلبات (لحذف الرمشة)
+            if (currentCount !== lastOrderCount || isInitialLoad) {
+                container.innerHTML = "";
+                currentKeys.reverse().forEach(id => {
+                    const o = data[id];
+                    const mapURL = `https://www.google.com/maps?q=${o.location.lat},${o.location.lon}`;
+                    container.innerHTML += `
+                        <div class="order-card">
+                            <b>👤 ${o.customerName}</b>
+                            <p>🍕 الطلب: <span style="color:var(--p)">${o.orderItem}</span></p>
+                            <div class="actions">
+                                <a href="tel:${o.phone}" class="btn btn-call">اتصال</a>
+                                <a href="${mapURL}" target="_blank" class="btn btn-map">الموقع</a>
+                            </div>
+                            <button class="btn btn-done" onclick="deleteOrder('${id}')">تم التوصيل (حذف) ✅</button>
+                        </div>`;
+                });
             }
 
             lastOrderCount = currentCount;
             isInitialLoad = false;
-
-            container.innerHTML = "";
-            currentKeys.reverse().forEach(id => {
-                const o = data[id];
-                const mapURL = `https://www.google.com/maps?q=${o.location.lat},${o.location.lon}`;
-                container.innerHTML += `
-                    <div class="order-card">
-                        <b>👤 ${o.customerName}</b>
-                        <p>🍕 الطلب: <span style="color:var(--p)">${o.orderItem}</span></p>
-                        <p style="font-size:11px; color:#999;">⏰ ${o.time || ''}</p>
-                        <div class="actions">
-                            <a href="tel:${o.phone}" class="btn btn-call">اتصال</a>
-                            <a href="${mapURL}" target="_blank" class="btn btn-map">موقع الزبون</a>
-                        </div>
-                        <button class="btn btn-done" onclick="deleteOrder('${id}')">تم التوصيل (حذف الطلب) ✅</button>
-                    </div>`;
-            });
-        } catch (e) { console.error("خطأ في جلب البيانات"); }
-    }
-
-    async function trackDriverLive() {
-        const res = await fetch(trackURL);
-        const loc = await res.json();
-        if(loc) {
-            document.getElementById('track-status').innerText = "آخر تحديث: " + loc.lastUpdate;
-            window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lon}`, '_blank');
-        } else { alert("السائق لم يفعل الـ GPS بعد"); }
+        } catch (e) { console.error("خطأ في الاتصال"); }
     }
 
     async function deleteOrder(id) {
-        if(confirm("حذف الطلب؟")) { 
-            await fetch(`${dbURL}/${id}.json`, { method: 'DELETE' }); 
-            loadOrders(); 
+        if(confirm("هل تم التوصيل؟")) {
+            await fetch(`${dbURL}/${id}.json`, { method: 'DELETE' });
+            loadOrders();
         }
     }
-
-    function toggleChat() { 
-        const b = document.getElementById('chatBox'); 
-        b.style.display = b.style.display === 'flex' ? 'none' : 'flex'; 
-        if(b.style.display === 'flex') loadMsgs();
-    }
-
-    async function sendMsg() {
-        const input = document.getElementById('msgInput');
-        if(!input.value) return;
-        const msg = { sender: 'المدير', text: input.value, time: new Date().toLocaleTimeString() };
-        await fetch(chatURL + ".json", { method: 'POST', body: JSON.stringify(msg) });
-        input.value = ""; loadMsgs();
-    }
-
-    async function loadMsgs() {
-        const res = await fetch(chatURL + ".json");
-        const data = await res.json();
-        const container = document.getElementById('chatMessages');
-        if(!data) return;
-        container.innerHTML = "";
-        Object.values(data).forEach(m => {
-            const isMe = m.sender === 'المدير';
-            container.innerHTML += `<div class="msg ${isMe ? 'msg-admin' : 'msg-driver'}">${m.text}</div>`;
-        });
-        container.scrollTop = container.scrollHeight;
-    }
-
-    async function clearChat() { if(confirm("مسح؟")) { await fetch(chatURL + ".json", { method: 'DELETE' }); loadMsgs(); } }
 </script>
 </body>
-    </html>
+</html>
