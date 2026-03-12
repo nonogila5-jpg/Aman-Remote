@@ -3,35 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة Aman Electronics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <title>Espace Propriétaire - Aman Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
     <style>
         :root { --p: #e67e22; --d: #2c3e50; --g: #27ae60; --r: #e74c3c; --bl: #3498db; }
         body { font-family: 'Cairo', sans-serif; background: #f0f2f5; margin: 0; padding-bottom: 80px; direction: rtl; }
-        header { background: var(--d); color: white; padding: 15px; text-align: center; border-bottom: 4px solid var(--p); position: sticky; top: 0; z-index: 1000; }
+        
+        /* الهيدر المحدث مع الشعار */
+        header { 
+            background: var(--d); 
+            color: white; 
+            padding: 20px 15px; 
+            text-align: center; 
+            border-bottom: 4px solid var(--p); 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        header .title { 
+            font-family: 'Poppins', sans-serif; 
+            font-size: 20px; 
+            letter-spacing: 1px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px; /* مسافة بين الشعار والنص */
+        }
+        header .title .pizza-logo { font-size: 24px; } /* حجم الشعار */
+        header .subtitle { font-size: 12px; color: var(--p); font-weight: bold; margin-top: 5px; opacity: 0.9; }
+
         .container { padding: 10px; max-width: 500px; margin: auto; }
         
-        /* شاشة البدء لتفعيل الصوت */
         #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { background: var(--p); color: white; border: none; padding: 18px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; }
+        #start-btn { background: var(--p); color: white; border: none; padding: 18px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4); }
 
-        /* إعدادات السائق والتتبع */
-        .admin-panel { background: white; margin-bottom: 15px; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 5px solid var(--bl); }
-        .input-group { display: flex; gap: 5px; margin-bottom: 10px; }
-        input[type="tel"] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ddd; text-align: center; }
+        .driver-manager { background: white; margin-bottom: 15px; padding: 15px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-top: 5px solid var(--bl); }
+        .input-row { display: flex; gap: 5px; margin-top: 10px; }
+        input { padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Cairo'; flex: 1; }
+        .driver-select { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-family: 'Cairo'; font-weight: bold; margin-bottom: 10px; background: #f9f9f9; }
         
-        /* البطاقات والطلبات */
-        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-right: 6px solid var(--p); }
-        .btn { padding: 10px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; color: white; display: inline-block; font-size: 13px; }
-        .btn-call-driver { background: var(--bl); width: 100%; margin-top: 5px; font-size: 14px; }
-        .btn-track { background: var(--d); width: 100%; margin-top: 5px; }
-        .btn-call { background: var(--g); } .btn-map { background: var(--d); } .btn-done { background: var(--r); width: 100%; margin-top: 10px; }
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .btn { padding: 10px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; color: white; display: inline-block; font-size: 13px; transition: 0.3s; }
+        .btn:active { transform: scale(0.95); }
+        .btn-add { background: var(--g); width: 100%; margin-top: 5px; }
+        .btn-del { background: var(--r); padding: 5px 10px; font-size: 11px; }
+        .btn-call-team { background: var(--bl); flex: 1; }
+        .btn-track-team { background: var(--d); flex: 1; }
 
-        /* نظام الدردشة */
+        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-right: 6px solid var(--p); }
+        
         #chatBox { display:none; position:fixed; bottom:90px; right:20px; width:300px; height:400px; background:white; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.2); z-index:2000; flex-direction:column; overflow:hidden; border: 1px solid var(--p); }
         #chatMessages { flex:1; padding:10px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
-        .msg { padding: 8px 12px; border-radius: 15px; max-width: 80%; font-size: 13px; }
+        .msg { padding: 8px 12px; border-radius: 15px; max-width: 80%; font-size: 12px; }
         .msg-admin { align-self: flex-end; background: var(--p); color: white; }
         .msg-driver { align-self: flex-start; background: #eee; color: #333; }
         .chat-toggle { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--p); color:white; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.3); font-size:24px; z-index:2000; cursor:pointer; }
@@ -40,26 +63,40 @@
 <body>
 
 <div id="start-overlay">
-    <h2>Aman Electronics 📦</h2>
-    <p>تفعيل جرس التنبيهات والدردشة</p>
-    <button id="start-btn" onclick="startSystem()">تشغيل لوحة التحكم 🔔</button>
+    <div style="font-family: 'Poppins'; font-size: 24px; margin-bottom: 10px;">AMAN ELECTRONICS</div>
+    <p>Système de Gestion Propriétaire</p>
+    <button id="start-btn" onclick="startAdmin()">ACTIVER LE SYSTÈME 🔔</button>
 </div>
 
 <header>
-    <div style="font-size: 18px; font-weight: bold;">📦 إدارة Aman Electronics</div>
+    <div class="title">
+        <span class="pizza-logo">🍕</span> Espace Propriétaire
+    </div>
+    <span class="subtitle">Gestion Premium & Suivi en Direct</span>
 </header>
 
 <audio id="alertSound" src="alert.mp3" preload="auto"></audio>
 
 <div class="container">
-    <div class="admin-panel">
-        <label style="font-size: 12px; color: #666;">إعداد رقم السائق:</label>
-        <div class="input-group">
-            <input type="tel" id="driverPhone" placeholder="رقم السائق">
-            <button onclick="saveDriverNum()" style="background:var(--g); color:white; border:none; border-radius:8px; padding:0 15px;">حفظ</button>
+    <div class="driver-manager">
+        <b style="font-size: 14px;">👥 قائمة السائقين النشطين:</b>
+        <div style="display:flex; gap:5px; align-items:center; margin-top:5px;">
+            <select id="driverList" class="driver-select" onchange="switchDriver()"></select>
+            <button class="btn btn-del" onclick="deleteCurrentDriver()">حذف</button>
         </div>
-        <a id="callDriverLink" href="tel:" class="btn btn-call-driver">📞 اتصال سريع بالسائق</a>
-        <button class="btn btn-track" onclick="trackDriverLive()">🚚 تعقب موقع السائق (Live)</button>
+
+        <div style="display: flex; gap: 8px;">
+            <a id="callBtn" href="tel:" class="btn btn-call-team">📞 إتصال</a>
+            <button class="btn btn-track-team" onclick="trackDriver()">🚚 تتبع</button>
+        </div>
+
+        <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+        <b style="font-size: 13px; color: var(--bl);">➕ إضافة سائق جديد:</b>
+        <div class="input-row">
+            <input type="text" id="newName" placeholder="اسم السائق">
+            <input type="tel" id="newPhone" placeholder="رقم الهاتف">
+        </div>
+        <button class="btn btn-add" onclick="addNewDriver()">حفظ السائق في القائمة</button>
     </div>
 
     <div id="orders-list"></div>
@@ -67,65 +104,87 @@
 
 <div id="chatBox">
     <div style="background:var(--p); color:white; padding:10px; display:flex; justify-content:space-between;">
-        <b>الدردشة مع السائق</b>
-        <button onclick="clearChat()" style="background:none; border:none; color:white; cursor:pointer;">مسح</button>
+        <b id="chatTitle">الدردشة</b>
+        <button onclick="clearChat()" style="background:none; border:none; color:white; font-size:10px;">مسح</button>
     </div>
     <div id="chatMessages"></div>
     <div style="padding:10px; display:flex; gap:5px; border-top:1px solid #eee;">
-        <input type="text" id="msgInput" placeholder="اكتب رسالة..." style="flex:1; border-radius:20px; padding:8px; border:1px solid #ddd;">
+        <input type="text" id="msgInput" placeholder="رسالة للسائق...">
         <button onclick="sendMsg()" style="background:var(--p); color:white; border:none; border-radius:50%; width:35px;">⬅️</button>
     </div>
 </div>
 <button class="chat-toggle" onclick="toggleChat()">💬</button>
 
 <script>
-    const dbURL = "https://aman-audoi-default-rtdb.firebaseio.com/orders";
-    const chatURL = "https://aman-audoi-default-rtdb.firebaseio.com/chat";
-    const trackURL = "https://aman-audoi-default-rtdb.firebaseio.com/driver_location.json";
-    
-    let lastDataString = ""; 
-    let isFirstRun = true;
+    const dbBase = "https://aman-audoi-default-rtdb.firebaseio.com";
+    let lastOrdersHash = "";
+    let isInit = true;
+    let drivers = JSON.parse(localStorage.getItem('amanDrivers')) || [];
 
-    function saveDriverNum() {
-        const num = document.getElementById('driverPhone').value;
-        localStorage.setItem('driverNum', num);
-        document.getElementById('callDriverLink').href = "tel:" + num;
-        alert("تم تحديث رقم السائق ✅");
-    }
-
-    function startSystem() {
+    function startAdmin() {
         document.getElementById('start-overlay').style.display = 'none';
-        const savedNum = localStorage.getItem('driverNum') || "0770189070";
-        document.getElementById('driverPhone').value = savedNum;
-        document.getElementById('callDriverLink').href = "tel:" + savedNum;
-        
         const audio = document.getElementById('alertSound');
         audio.play().then(() => { audio.pause(); audio.currentTime = 0; });
-        
-        updateOrders();
-        setInterval(updateOrders, 4000); 
-        setInterval(loadMsgs, 3000);
+        renderDriverList();
+        fetchOrders();
+        setInterval(fetchOrders, 4000);
+        setInterval(loadChat, 3000);
     }
 
-    async function updateOrders() {
+    function renderDriverList() {
+        const select = document.getElementById('driverList');
+        select.innerHTML = drivers.length ? "" : "<option value=''>لا يوجد سائقين</option>";
+        drivers.forEach((d, index) => {
+            select.innerHTML += `<option value="${d.phone}" data-index="${index}">${d.name}</option>`;
+        });
+        switchDriver();
+    }
+
+    function addNewDriver() {
+        const name = document.getElementById('newName').value;
+        const phone = document.getElementById('newPhone').value;
+        if(!name || !phone) return alert("أدخل الاسم والرقم!");
+        drivers.push({ name, phone });
+        localStorage.setItem('amanDrivers', JSON.stringify(drivers));
+        document.getElementById('newName').value = "";
+        document.getElementById('newPhone').value = "";
+        renderDriverList();
+    }
+
+    function deleteCurrentDriver() {
+        const select = document.getElementById('driverList');
+        if(select.selectedIndex < 0 || drivers.length === 0) return;
+        if(confirm("هل تريد حذف هذا السائق؟")) {
+            drivers.splice(select.selectedIndex, 1);
+            localStorage.setItem('amanDrivers', JSON.stringify(drivers));
+            renderDriverList();
+        }
+    }
+
+    function switchDriver() {
+        const select = document.getElementById('driverList');
+        if(drivers.length > 0) {
+            const phone = select.value;
+            document.getElementById('callBtn').href = "tel:" + phone;
+            document.getElementById('chatTitle').innerText = "دردشة: " + select.options[select.selectedIndex].text;
+            loadChat();
+        }
+    }
+
+    async function fetchOrders() {
         try {
-            const res = await fetch(dbURL + ".json");
+            const res = await fetch(`${dbBase}/orders.json`);
             const data = await res.json();
-            const currentDataString = JSON.stringify(data);
-
-            if (currentDataString === lastDataString) return; 
-
+            const currentHash = JSON.stringify(data);
+            if (currentHash === lastOrdersHash) return;
             const container = document.getElementById('orders-list');
             if (!data) {
-                container.innerHTML = "<p style='text-align:center;'>لا توجد طلبات</p>";
-                lastDataString = currentDataString;
-                return;
+                container.innerHTML = "<p style='text-align:center;'>لا توجد طلبات حالياً</p>";
+                lastOrdersHash = currentHash; return;
             }
-
-            if (Object.keys(data).length > (lastDataString && lastDataString !== "null" ? Object.keys(JSON.parse(lastDataString)).length : 0) && !isFirstRun) {
+            if (!isInit && Object.keys(data).length > (lastOrdersHash !== "null" ? Object.keys(JSON.parse(lastOrdersHash)).length : 0)) {
                 document.getElementById('alertSound').play();
             }
-
             container.innerHTML = "";
             Object.keys(data).reverse().forEach(id => {
                 const o = data[id];
@@ -133,27 +192,50 @@
                     <div class="order-card">
                         <b>👤 ${o.customerName}</b>
                         <p>🍕 الطلب: <span style="color:var(--p)">${o.orderItem}</span></p>
-                        <div class="actions">
-                            <a href="tel:${o.phone}" class="btn btn-call">اتصال بالزبون</a>
-                            <a href="https://www.google.com/maps?q=${o.location.lat},${o.location.lon}" target="_blank" class="btn btn-map">موقع الزبون</a>
+                        <div style="display:flex; gap:5px;">
+                            <a href="tel:${o.phone}" class="btn" style="background:var(--g); flex:1;">اتصال بالزبون</a>
+                            <a href="https://www.google.com/maps?q=${o.location.lat},${o.location.lon}" target="_blank" class="btn" style="background:var(--d); flex:1;">الموقع 📍</a>
                         </div>
-                        <button class="btn btn-done" onclick="completeOrder('${id}')">تم التوصيل ✅</button>
+                        <button class="btn" style="background:var(--r); width:100%; margin-top:10px;" onclick="deleteOrder('${id}')">تم التوصيل ✅</button>
                     </div>`;
             });
-            lastDataString = currentDataString;
-            isFirstRun = false;
-        } catch (e) { console.error("Error fetching"); }
+            lastOrdersHash = currentHash; isInit = false;
+        } catch (e) { console.log("Error"); }
     }
 
-    async function trackDriverLive() {
-        const res = await fetch(trackURL);
+    async function trackDriver() {
+        const select = document.getElementById('driverList');
+        if(drivers.length === 0) return;
+        const name = select.options[select.selectedIndex].text;
+        const res = await fetch(`${dbBase}/drivers/${name}/location.json`);
         const loc = await res.json();
-        if(loc) { window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lon}`, '_blank'); } 
-        else { alert("السائق لم يفعل الـ GPS"); }
+        if(loc) window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lon}`, '_blank');
+        else alert("GPS السائق غير نشط");
     }
 
-    async function completeOrder(id) {
-        if(confirm("حذف الطلب؟")) { await fetch(`${dbURL}/${id}.json`, { method: 'DELETE' }); updateOrders(); }
+    async function sendMsg() {
+        const select = document.getElementById('driverList');
+        const input = document.getElementById('msgInput');
+        if(!input.value || drivers.length === 0) return;
+        const name = select.options[select.selectedIndex].text;
+        await fetch(`${dbBase}/chats/${name}.json`, { method: 'POST', body: JSON.stringify({ sender: 'المدير', text: input.value }) });
+        input.value = ""; loadChat();
+    }
+
+    async function loadChat() {
+        const select = document.getElementById('driverList');
+        if(drivers.length === 0) return;
+        const name = select.options[select.selectedIndex].text;
+        const res = await fetch(`${dbBase}/chats/${name}.json`);
+        const data = await res.json();
+        const container = document.getElementById('chatMessages');
+        container.innerHTML = "";
+        if(data) {
+            Object.values(data).forEach(m => {
+                container.innerHTML += `<div class="msg ${m.sender === 'المدير' ? 'msg-admin' : 'msg-driver'}">${m.text}</div>`;
+            });
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     function toggleChat() { 
@@ -161,26 +243,11 @@
         b.style.display = b.style.display === 'flex' ? 'none' : 'flex'; 
     }
 
-    async function sendMsg() {
-        const input = document.getElementById('msgInput');
-        if(!input.value) return;
-        await fetch(chatURL + ".json", { method: 'POST', body: JSON.stringify({ sender: 'المدير', text: input.value }) });
-        input.value = ""; loadMsgs();
+    async function deleteOrder(id) { if(confirm("حذف الطلب؟")) { await fetch(`${dbBase}/orders/${id}.json`, { method: 'DELETE' }); fetchOrders(); } }
+    async function clearChat() { 
+        const name = document.getElementById('driverList').options[document.getElementById('driverList').selectedIndex].text;
+        if(confirm("مسح؟")) { await fetch(`${dbBase}/chats/${name}.json`, { method: 'DELETE' }); loadChat(); } 
     }
-
-    async function loadMsgs() {
-        const res = await fetch(chatURL + ".json");
-        const data = await res.json();
-        const container = document.getElementById('chatMessages');
-        if(!data) return;
-        container.innerHTML = "";
-        Object.values(data).forEach(m => {
-            container.innerHTML += `<div class="msg ${m.sender === 'المدير' ? 'msg-admin' : 'msg-driver'}">${m.text}</div>`;
-        });
-        container.scrollTop = container.scrollHeight;
-    }
-
-    async function clearChat() { if(confirm("مسح الدردشة؟")) { await fetch(chatURL + ".json", { method: 'DELETE' }); loadMsgs(); } }
 </script>
 </body>
-    </html>
+                                                                </html>
