@@ -1,0 +1,25 @@
+function uploadMenu() {
+    const database = firebase.database();
+    
+    // البيانات التي تريد رفعها
+    const menuData = {
+        "b1": {
+            "name": "Burger Classique",
+            "price": 450,
+            "cat": "burger",
+            // هنا السر: نقوم بدمج رابط GitHub مع اسم الصورة قبل الرفع
+            "img": "https://raw.githubusercontent.com/nonogila5-jpg/Aman-Remote/main/Burger.jpeg",
+            "isNew": false,
+            "isPromo": false
+        },
+        // كرر نفس الأمر لبقية الوجبات (p1, p2, p3...)
+    };
+
+    database.ref('menu').set(menuData)
+        .then(() => {
+            document.getElementById('status').innerText = "✅ تم تحديث القائمة بنجاح مع روابط الصور!";
+        })
+        .catch((error) => {
+            document.getElementById('status').innerText = "❌ فشل الرفع: " + error.message;
+        });
+}
