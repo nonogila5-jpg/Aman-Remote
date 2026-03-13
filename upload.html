@@ -1,25 +1,81 @@
-function uploadMenu() {
-    const database = firebase.database();
-    
-    // البيانات التي تريد رفعها
-    const menuData = {
-        "b1": {
-            "name": "Burger Classique",
-            "price": 450,
-            "cat": "burger",
-            // هنا السر: نقوم بدمج رابط GitHub مع اسم الصورة قبل الرفع
-            "img": "https://raw.githubusercontent.com/nonogila5-jpg/Aman-Remote/main/Burger.jpeg",
-            "isNew": false,
-            "isPromo": false
-        },
-        // كرر نفس الأمر لبقية الوجبات (p1, p2, p3...)
-    };
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Aman Electronics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-    database.ref('menu').set(menuData)
-        .then(() => {
-            document.getElementById('status').innerText = "✅ تم تحديث القائمة بنجاح مع روابط الصور!";
-        })
-        .catch((error) => {
-            document.getElementById('status').innerText = "❌ فشل الرفع: " + error.message;
-        });
-}
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #f0f2f5; text-align: center; padding: 40px 20px; }
+        .admin-box { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        h1 { color: #ff6d00; font-weight: 900; }
+        p { color: #666; font-size: 14px; }
+        .btn-push { background: #27ae60; color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 20px; font-family: 'Cairo'; }
+        .btn-push:hover { background: #219150; transform: scale(1.02); }
+        #status { margin-top: 20px; font-weight: bold; }
+        .info-card { background: #fff8e1; padding: 15px; border-radius: 10px; border-right: 5px solid #ffb300; text-align: right; margin-bottom: 20px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-box">
+        <h1>لوحة تحكم المنيو 🚀</h1>
+        <p>Aman Electronics - Pizza Project</p>
+        
+        <div class="info-card">
+            هذا الزر سيقوم برفع 4 أنواع بيتزا، 4 سندويشات، و1 برغر إلى Firebase مع روابط الصور المباشرة من GitHub.
+        </div>
+
+        <button class="btn-push" onclick="pushMenuToFirebase()">تحديث المنيو بالكامل الآن ✅</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // 1. ضع إعدادات Firebase الخاصة بك هنا (موجودة في مشروع Firebase الخاص بك)
+        const firebaseConfig = {
+            databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        function pushMenuToFirebase() {
+            const status = document.getElementById('status');
+            status.innerText = "جاري الرفع... انتظر لحظة ⏳";
+
+            // الرابط الأساسي لصور GitHub الخاصة بك (المسار الخام)
+            const rawUrl = "https://raw.githubusercontent.com/nonogila5-jpg/Aman-Remote/main/";
+
+            // 2. البيانات الكاملة (الـ 9 أصناف)
+            const menuData = {
+                // قسم البيتزا (4 أصناف)
+                "p1": { "name": "Pizza Margherita", "price": 600, "cat": "pizza", "img": rawUrl + "p1.jpg" },
+                "p2": { "name": "Pizza Orientale", "price": 850, "cat": "pizza", "img": rawUrl + "p2.jpg" },
+                "p3": { "name": "Pizza 4 Saisons", "price": 900, "cat": "pizza", "img": rawUrl + "p3.jpg" },
+                "p4": { "name": "Pizza Thon", "price": 750, "cat": "pizza", "img": rawUrl + "p4.jpg" },
+
+                // قسم السندويش (4 أصناف)
+                "s1": { "name": "Sandwich Escalope", "price": 450, "cat": "sand", "img": rawUrl + "s1.jpg" },
+                "s2": { "name": "Sandwich Viande Hachée", "price": 550, "cat": "sand", "img": rawUrl + "s2.jpg" },
+                "s3": { "name": "Sandwich Mixte", "price": 600, "cat": "sand", "img": rawUrl + "s3.jpg" },
+                "s4": { "name": "Sandwich Thon", "price": 350, "cat": "sand", "img": rawUrl + "s4.jpg" },
+
+                // قسم البرغر (صنف 1)
+                "b1": { "name": "Burger Royale", "price": 500, "cat": "burger", "img": rawUrl + "Burger.jpeg" }
+            };
+
+            // الرفع إلى Firebase
+            database.ref('menu').set(menuData)
+                .then(() => {
+                    status.innerHTML = "<span style='color:green'>تم التحديث بنجاح! اذهب الآن لصفحة الزبون وستجد الصور ظهرت ✅</span>";
+                })
+                .catch((error) => {
+                    status.innerHTML = "<span style='color:red'>خطأ في الرفع: " + error.message + "</span>";
+                });
+        }
+    </script>
+</body>
+        </html>
