@@ -1,170 +1,123 @@
 <!DOCTYPE html>
-<html lang="fr" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIZZÉRIA - Menu</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <title>Aman Electronics - القائمة النهائية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        :root { --orange: #ff6d00; --dark: #2c3e50; --green: #27ae60; --bg: #f4f4f4; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
-        
-        header { background: var(--orange); color: white; padding: 25px 15px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        header h1 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 2px; }
-
-        .container { padding: 15px; max-width: 500px; margin: auto; }
-        
-        /* الأقسام */
-        .tabs { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0 20px; scrollbar-width: none; }
-        .tab { background: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; white-space: nowrap; font-weight: bold; color: #888; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        :root { --orange: #ff6d00; --bg: #f5f5f5; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; }
+        .header { background: #1a1a1a; color: white; padding: 20px; text-align: center; border-radius: 0 0 20px 20px; }
+        .tabs { display: flex; gap: 10px; overflow-x: auto; padding: 15px; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+        .tab { background: white; border: none; padding: 8px 15px; border-radius: 15px; font-weight: bold; cursor: pointer; white-space: nowrap; font-family: 'Cairo'; }
         .tab.active { background: var(--orange); color: white; }
-
-        /* البطاقة - الصورة يميناً */
-        .card { 
-            background: white; border-radius: 25px; padding: 12px; margin-bottom: 18px; 
-            display: flex; flex-direction: row; align-items: center; 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.06); height: 130px; border: 1px solid #eee;
-        }
-
-        .img-box { 
-            width: 110px; height: 110px; border-radius: 20px; 
-            overflow: hidden; margin-left: 18px; flex-shrink: 0; background: #eee;
-        }
+        .container { padding: 10px; max-width: 500px; margin: auto; }
+        .card { background: white; border-radius: 20px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        /* إعدادات الصورة الصارمة */
+        .img-box { width: 80px; height: 80px; border-radius: 15px; overflow: hidden; margin-left: 12px; background: #eee; flex-shrink: 0; position: relative; }
         .img-box img { width: 100%; height: 100%; object-fit: cover; }
-
-        .info { flex: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; text-align: right; }
-        .info h3 { margin: 0; font-size: 17px; color: var(--dark); font-weight: 800; }
-        .price { color: var(--orange); font-weight: bold; font-size: 18px; }
-        .btn-order { background: var(--green); color: white; border: none; padding: 8px 15px; border-radius: 12px; cursor: pointer; font-weight: bold; font-family: 'Cairo'; width: fit-content; }
-
-        /* النافذة المنبثقة */
-        #orderModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; backdrop-filter: blur(5px); }
-        .modal-box { background: white; margin: 12% auto; padding: 25px; width: 85%; border-radius: 30px; text-align: center; }
-        input { width: 100%; box-sizing: border-box; padding: 15px; margin: 10px 0; border: 1.5px solid #eee; border-radius: 15px; font-size: 16px; font-family: 'Cairo'; }
-        .gps-box { background: #fff9f5; padding: 15px; border-radius: 15px; margin: 15px 0; border: 2px dashed var(--orange); }
-        #gBtn { background: var(--dark); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-family: 'Cairo'; font-weight: bold; }
-        .btn-confirm { width: 100%; padding: 18px; background: var(--green); color: white; border: none; border-radius: 18px; font-size: 18px; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
+        
+        .info { flex: 1; text-align: right; }
+        .info h3 { margin: 0; font-size: 16px; color: #333; }
+        .price { color: var(--orange); font-weight: 900; font-size: 17px; }
+        .controls { display: flex; align-items: center; gap: 10px; }
+        .btn-qty { width: 30px; height: 30px; border-radius: 50%; border: none; font-weight: bold; cursor: pointer; }
+        .plus { background: var(--orange); color: white; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: white; padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; box-shadow: 0 -5px 15px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>🍕 PIZZÉRIA 🍕</h1>
-    </header>
+    <div class="header"><h1>Aman Electronics</h1></div>
+    <div class="tabs">
+        <button class="tab active" onclick="filter('all', this)">الكل</button>
+        <button class="tab" onclick="filter('pizza', this)">بيتزا</button>
+        <button class="tab" onclick="filter('sand', this)">سندويش</button>
+        <button class="tab" onclick="filter('burger', this)">برغر</button>
+    </div>
 
-    <div class="container">
-        <div class="tabs">
-            <button class="tab active" onclick="filterCat('all', this)">Tous</button>
-            <button class="tab" onclick="filterCat('pizza', this)">Pizza</button>
-            <button class="tab" onclick="filterCat('sand', this)">Sandwich</button>
-            <button class="tab" onclick="filterCat('burger', this)">Burger</button>
-        </div>
+    <div class="container" id="list"></div>
 
-        <div id="menu-container"></div>
-
-        <div id="orderModal">
-            <div class="modal-box">
-                <h3 id="itemName" style="color:var(--orange); margin-top:0;"></h3>
-                <input type="text" id="cName" placeholder="Nom Complet">
-                <input type="tel" id="cPhone" placeholder="Numéro de Téléphone">
-                <div class="gps-box">
-                    <button onclick="getLoc()" id="gBtn">📍 Ma Position GPS</button>
-                    <p id="gStat" style="font-size:12px; margin-top:8px; color:#666;">Localisation requise</p>
-                </div>
-                <button class="btn-confirm" id="finalBtn" onclick="sendIt()">Confirmer ✅</button>
-                <button onclick="closeGo()" style="background:none; border:none; color:red; margin-top:10px; cursor:pointer;">Annuler</button>
-            </div>
-        </div>
+    <div class="footer">
+        <div style="font-size: 22px; font-weight: 900;"><span id="total">0</span> DZD</div>
+        <button onclick="order()" style="background:var(--orange); color:white; border:none; padding:12px 25px; border-radius:12px; font-family:'Cairo'; font-weight:bold;">اطلب</button>
     </div>
 
     <script>
-        // مصفوفة البيانات مطابقة تماماً لأسماء صورك في GitHub
-        const menuData = [
-            { name: "Pizza Margherita", price: "500 DZD", cat: "pizza", img: "Pizza margirita.jpeg" },
-            { name: "Pizza 4 Fromages", price: "750 DZD", cat: "pizza", img: "Pidzza 4 formage.jpeg" },
-            { name: "Pizza Couverte", price: "700 DZD", cat: "pizza", img: "Pizza couvert.jpeg" },
-            { name: "Pizza Thon", price: "600 DZD", cat: "pizza", img: "Pizza thon .jpeg" },
-            { name: "Pizza Viande Hachée", price: "650 DZD", cat: "pizza", img: "Pizza vindeache.jpeg" },
-            { name: "Sandwich Poulet", price: "450 DZD", cat: "sand", img: "Sandwich poulet.jpeg" },
-            { name: "Sandwich Viande", price: "550 DZD", cat: "sand", img: "Sandwich viande.jpeg" },
-            { name: "Sandwich Mixte", price: "600 DZD", cat: "sand", img: "Sandwich mixte.jpeg" },
-            { name: "Sandwich Shawarma", price: "500 DZD", cat: "sand", img: "Sandwich shawarma.jpeg" },
-            { name: "Tacos", price: "550 DZD", cat: "sand", img: "Tacos.jpeg" },
-            { name: "Burger Classique", price: "450 DZD", cat: "burger", img: "Burger.jpeg" }
-        ];
+        const config = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(config);
+        const db = firebase.database();
 
-        let loc = null;
-        // رابط قاعدة بيانات Firebase الخاصة بك
-        const dbURL = "https://aman-audoi-default-rtdb.firebaseio.com/orders.json";
+        let menu = [];
+        let cart = {};
+        let cat = 'all';
 
-        function renderMenu(filter = "all") {
-            const container = document.getElementById('menu-container');
+        // دالة جلب البيانات
+        db.ref('menu').on('value', s => {
+            const d = s.val();
+            if(d) {
+                menu = Object.keys(d).map(k => ({id:k, ...d[k]}));
+                render();
+            }
+        });
+
+        function render() {
+            const container = document.getElementById('list');
             container.innerHTML = "";
-            const items = filter === "all" ? menuData : menuData.filter(i => i.cat === filter);
             
-            items.forEach(item => {
+            menu.forEach(item => {
+                if(cat !== 'all' && item.cat !== cat) return;
+                const q = cart[item.id] || 0;
+                
+                // الرابط المباشر 100% لـ GitHub Raw
+                // تأكد أن أسماء الصور في GitHub هي p1.jpg, p2.jpg...
+                const imgName = item.img.includes('/') ? item.img.split('/').pop() : item.img;
+                const finalImg = `https://raw.githubusercontent.com/nonogila5-jpg/Aman-Remote/main/${imgName}`;
+
                 container.innerHTML += `
                     <div class="card">
-                        <div class="img-box"><img src="${item.img}" alt="${item.name}"></div>
+                        <div class="img-box">
+                            <img src="${finalImg}" loading="lazy" onerror="this.src='https://via.placeholder.com/80?text=Aman'">
+                        </div>
                         <div class="info">
-                            <div>
-                                <h3>${item.name}</h3>
-                                <span class="price">${item.price}</span>
-                            </div>
-                            <button class="btn-order" onclick="openGo('${item.name}')">Commander</button>
+                            <h3>${item.name}</h3>
+                            <span class="price">${item.price} DZD</span>
+                        </div>
+                        <div class="controls">
+                            <button class="btn-qty plus" onclick="up('${item.id}',1)">+</button>
+                            <span>${q}</span>
+                            <button class="btn-qty" onclick="up('${item.id}',-1)" ${q==0?'disabled':''}>-</button>
                         </div>
                     </div>`;
             });
         }
 
-        function filterCat(cat, btn) {
-            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderMenu(cat);
+        function up(id, v) {
+            cart[id] = (cart[id] || 0) + v;
+            if(cart[id] <= 0) delete cart[id];
+            let t = 0;
+            menu.forEach(i => { if(cart[i.id]) t += i.price * cart[i.id]; });
+            document.getElementById('total').innerText = t;
+            render();
         }
 
-        function openGo(n) {
-            document.getElementById('orderModal').style.display = 'block';
-            document.getElementById('itemName').innerText = n;
+        function filter(c, b) {
+            cat = c;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            b.classList.add('active');
+            render();
         }
 
-        function closeGo() { document.getElementById('orderModal').style.display = 'none'; }
-
-        function getLoc() {
-            const s = document.getElementById('gStat');
-            navigator.geolocation.getCurrentPosition(p => {
-                loc = { lat: p.coords.latitude, lon: p.coords.longitude };
-                s.innerText = "✅ Position Localisée"; s.style.color = "green";
-                document.getElementById('gBtn').style.background = "#27ae60";
-            }, () => { alert("Veuillez activer le GPS"); });
+        function order() {
+            if(Object.keys(cart).length === 0) return;
+            let m = "طلب جديد:%0A";
+            for(let id in cart) m += `- ${menu.find(i=>i.id==id).name} (${cart[id]})%0A`;
+            window.open(`https://wa.me/213XXXXXXXXX?text=${m}`);
         }
-
-        async function sendIt() {
-            const n = document.getElementById('cName').value;
-            const p = document.getElementById('cPhone').value;
-            const item = document.getElementById('itemName').innerText;
-            const btn = document.getElementById('finalBtn');
-
-            if(!n || !p || !loc) { alert("Veuillez remplir les champs et localiser votre position !"); return; }
-
-            btn.disabled = true; btn.innerText = "Envoi...";
-            const order = { 
-                customerName: n, 
-                phone: p, 
-                orderItem: item, 
-                location: loc, 
-                time: new Date().toLocaleString() 
-            };
-
-            try {
-                const res = await fetch(dbURL, { method: 'POST', body: JSON.stringify(order) });
-                if(res.ok) { alert("Succès ! Votre commande a été envoyée."); closeGo(); }
-                else { alert("Erreur lors de l'envoi."); }
-            } catch (e) { alert("Erreur de connexion Firebase."); }
-            finally { btn.disabled = false; btn.innerText = "Confirmer ✅"; }
-        }
-
-        window.onload = () => renderMenu();
     </script>
 </body>
-        </html>
+</html>
