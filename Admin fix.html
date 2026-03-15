@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Fix - Aman Electronics</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f4; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: inline-block; }
+        button { padding: 15px 30px; background: #ff6d00; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; }
+        #status { margin-top: 20px; font-weight: bold; color: #27ae60; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Mise à jour du Menu 🇫🇷</h2>
+        <p>اضغط لتحويل جميع الأسماء إلى اللغة الفرنسية</p>
+        <button onclick="fixNamesToFrench()">Transformer en Français 🔥</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // إعدادات Firebase الخاصة بك كما في الفيديو
+        const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function fixNamesToFrench() {
+            const status = document.getElementById('status');
+            status.innerText = "Mise à jour en cours... ⏳";
+
+            // رابط صورك على GitHub
+            const gitUrl = "https://raw.githubusercontent.com/nonogila5-jpg/Aman-Remote/main/";
+
+            // البيانات الجديدة بالفرنسية بالكامل
+            const frenchMenu = {
+                "p1": { "name": "Pizza Margherita", "price": 800, "cat": "pizza", "img": gitUrl + "Pizza%20margirita.jpg" },
+                "p2": { "name": "Pizza 4 Fromages", "price": 900, "cat": "pizza", "img": gitUrl + "Pidzza%204%20formage.jpg" },
+                "p3": { "name": "Pizza au Thon", "price": 950, "cat": "pizza", "img": gitUrl + "Pizza%20thon%20.jpg" },
+                "p4": { "name": "Pizza Couverte", "price": 900, "cat": "pizza", "img": gitUrl + "Pizza%20couvert.jpg" },
+                "s1": { "name": "Sandwich Mixte", "price": 450, "cat": "sand", "img": gitUrl + "Sandwich%20mixte.jpg" },
+                "s2": { "name": "Sandwich Poulet", "price": 500, "cat": "sand", "img": gitUrl + "Sandwich%20poulet.jpg" },
+                "s3": { "name": "Sandwich Viande", "price": 600, "cat": "sand", "img": gitUrl + "Sandwich%20viande.jpg" },
+                "b1": { "name": "Burger Royale", "price": 700, "cat": "burger", "img": gitUrl + "Burger.jpg" }
+            };
+
+            // حفظ البيانات في Firebase
+            db.ref('menu').set(frenchMenu).then(() => {
+                status.innerHTML = "✅ Succès! Tous les noms sont en français.";
+            }).catch((error) => {
+                status.innerHTML = "❌ Erreur: " + error.message;
+            });
+        }
+    </script>
+</body>
+</html>
