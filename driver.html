@@ -3,168 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pizaza DZ - Driver App</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <title>Salsabil Driver Pro - Aman Electronics</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --p: #e67e22; --d: #2c3e50; --bl: #3498db; --g: #27ae60; --r: #e74c3c; --y: #f1c40f; }
-        
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background: #222; /* خلفية داكنة لإبراز المربع */
-            margin: 0; 
-            padding-bottom: 80px; 
-            direction: rtl; 
-            overflow: hidden; /* منع التمرير في شاشة الدخول */
-        }
-        
-        /* شاشة الدخول مع صورة بيتزا في الخلفية */
-        #login-screen { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1593560704563-f176a2eb61db?q=80&w=1000'); 
-            background-size: cover; background-position: center;
-            z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; 
-        }
-        
-        /* المربع الأبيض المتناسق في الوسط */
-        .login-card { 
-            background: rgba(255, 255, 255, 0.98); 
-            padding: 40px 30px; border-radius: 30px; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
-            text-align: center; width: 100%; max-width: 380px; /* عرض مناسب ومتناسق */
-            border: 3px solid var(--p);
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        /* تأثير ظهور ناعم */
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --messenger: #0084ff; --green: #2ecc71; --red: #ff4757; }
+        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; direction: rtl; overflow-x: hidden; }
 
-        /* الشعار الجديد */
-        .brand-logo { 
-            font-family: 'Poppins', sans-serif; font-size: 30px; font-weight: bold; color: var(--p);
-            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 5px;
+        /* قوس المطر الاحترافي */
+        .rainbow-text {
+            font-weight: 900; background: linear-gradient(to right, #ff2400, #e8b21d, #1de840, #1ddde8, #2b1de8, #dd00f3);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 400%;
+            animation: rainbow 8s linear infinite;
         }
-        .brand-logo-dz { background: #1a1a1a; color: var(--y); padding: 0 8px; border-radius: 8px; font-size: 24px; }
+        @keyframes rainbow { 0% { background-position: 0%; } 100% { background-position: 400%; } }
 
-        input[type="text"] { 
-            width: 100%; padding: 14px; margin: 20px 0; 
-            border: 2px solid #ddd; border-radius: 15px; 
-            font-family: 'Cairo'; text-align: center; font-size: 16px; outline: none; transition: 0.3s;
-        }
-        input[type="text"]:focus { border-color: var(--p); box-shadow: 0 0 10px rgba(230,126,34,0.2); }
+        /* واجهة الدخول */
+        #login-section { display: flex; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); }
+        .login-card { background: var(--card); padding: 40px 20px; border-radius: 30px; border: 1px solid #333; width: 85%; max-width: 380px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9); }
+        input { width: 100%; padding: 15px; margin: 12px 0; border-radius: 15px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--main); box-shadow: 0 0 10px rgba(255,109,0,0.3); }
+        .btn-login { width: 100%; padding: 16px; border-radius: 15px; border: none; background: var(--main); color: #000; font-weight: 900; cursor: pointer; font-size: 17px; margin-top: 10px; }
 
-        .btn-login { 
-            background: var(--p); color: white; border: none; width: 100%; 
-            padding: 15px; border-radius: 15px; font-weight: bold; cursor: pointer; 
-            font-size: 18px; transition: 0.3s; box-shadow: 0 8px 15px rgba(230, 126, 34, 0.3);
-        }
-        .btn-login:hover { background: #d35400; transform: translateY(-2px); }
+        /* واجهة المهام الاحترافية */
+        #tasks-section { display: none; padding-bottom: 80px; }
+        header { background: rgba(22, 22, 22, 0.9); backdrop-filter: blur(10px); sticky; top: 0; z-index: 100; padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .driver-info { display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); }
 
-        /* باقي الكود المصدري الأصلي كما هو */
-        header { background: var(--d); color: var(--y); padding: 15px; text-align: center; font-weight: bold; position: sticky; top:0; z-index:1000; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border-bottom: 3px solid var(--p); }
-        .admin-bar { background: white; margin: 12px; padding: 15px; border-radius: 15px; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #ddd; }
-        .card { background: white; margin: 15px; border-radius: 20px; padding: 20px; border-right: 8px solid var(--p); box-shadow: 0 5px 15px rgba(0,0,0,0.05); position: relative; }
-        .btn { display: block; text-align: center; padding: 13px; border-radius: 12px; text-decoration: none; margin-top: 10px; font-weight: bold; font-size: 14px; color: white; border:none; transition: 0.3s; }
-        .btn-map { background: var(--d); } .btn-call { background: var(--g); }
-        #chatBox { display:none; position:fixed; bottom:95px; left:20px; width:85%; max-width:320px; height:450px; background:white; border-radius:25px; box-shadow:0 15px 40px rgba(0,0,0,0.2); z-index:2000; flex-direction:column; overflow:hidden; border: 2px solid var(--p); }
-        #chatMessages { flex:1; padding:15px; overflow-y:auto; display:flex; flex-direction:column; gap:10px; background:#fffaf5; }
-        .msg { padding: 10px 15px; border-radius: 18px; max-width: 80%; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
-        .msg-driver { align-self: flex-end; background: var(--p); color: white; border-bottom-right-radius: 2px; }
-        .msg-admin { align-self: flex-start; background: #eee; color: #333; border-bottom-left-radius: 2px; }
-        .chat-toggle { position:fixed; bottom:20px; left:20px; width:65px; height:65px; border-radius:50%; background:var(--p); color:white; border:none; box-shadow:0 8px 20px rgba(230, 126, 34, 0.4); font-size:28px; z-index:2000; cursor:pointer; }
+        .stats-bar { display: flex; justify-content: space-around; padding: 20px 10px; background: #111; margin: 10px; border-radius: 20px; border: 1px solid #222; }
+        .stat-item { text-align: center; }
+        .stat-item span { display: block; font-size: 12px; color: #888; }
+        .stat-item b { font-size: 20px; color: var(--main); }
+
+        .order-card { background: var(--card); border-radius: 25px; padding: 20px; margin: 15px; border: 1px solid #333; position: relative; transition: 0.3s; }
+        .order-card:active { transform: scale(0.98); }
+        .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .cust-name { font-size: 18px; font-weight: 900; color: #fff; }
+        .order-price { background: rgba(46, 204, 113, 0.2); color: var(--green); padding: 5px 12px; border-radius: 10px; font-weight: bold; }
+        
+        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn-call { background: #333; color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: bold; }
+        .btn-gps { background: var(--main); color: #000; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: bold; }
+        .btn-done { width: 100%; margin-top: 10px; background: var(--green); color: #fff; border: none; padding: 14px; border-radius: 15px; font-weight: 900; cursor: pointer; font-family: 'Cairo'; font-size: 16px; }
+
+        /* الدردشة */
+        .messenger-fab { position: fixed; bottom: 20px; left: 20px; width: 65px; height: 65px; background: var(--messenger); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,132,255,0.4); }
+        .chat-window { display: none; position: fixed; bottom: 95px; left: 20px; width: 300px; height: 420px; background: var(--card); border: 2px solid var(--messenger); border-radius: 25px; flex-direction: column; z-index: 999; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #000; }
+        .msg { margin-bottom: 12px; max-width: 80%; padding: 10px; border-radius: 15px; font-size: 13px; }
+        .msg.admin { background: #333; align-self: flex-start; border-bottom-right-radius: 2px; }
+        .msg.me { background: var(--messenger); align-self: flex-end; border-bottom-left-radius: 2px; margin-right: auto; }
+
+        .loader { display: none; width: 30px; height: 30px; border: 4px solid var(--main); border-bottom-color: transparent; border-radius: 50%; margin: 10px auto; animation: rotation 1s linear infinite; }
+        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div id="login-screen">
-    <div class="login-card">
-        <div class="brand-logo">
-            <span class="brand-logo-dz">DZ</span> PIZAZA
+    <div id="login-section">
+        <div class="login-card">
+            <h1 class="rainbow-text">AMAN DRIVER</h1>
+            <p style="color:#888; font-size:12px;">نظام إدارة التوصيل الذكي</p>
+            <input type="text" id="user-input" placeholder="اسم المستخدم">
+            <input type="password" id="pass-input" placeholder="كلمة السر">
+            <div id="loader" class="loader"></div>
+            <button class="btn-login" onclick="login()">دخول 🛵</button>
+            <p id="error-msg" style="color:var(--red); font-size:12px; display:none; margin-top:15px;"></p>
         </div>
-        <p style="font-size: 14px; color: #555; font-weight: bold; margin-bottom: 0;">Livraison Express 🍕</p>
-        <hr style="border:0; border-top:1px solid #eee; margin:25px 0;">
-        <input type="text" id="driverNameInput" placeholder="Entrez Driver ID / Nom">
-        <button class="btn-login" onclick="attemptLogin()">دخول للنظام</button>
-        <p id="login-status" style="font-size: 12px; color: var(--r); margin-top: 15px; font-weight: bold;"></p>
     </div>
-</div>
 
-<header>🍕 PIZAZA DZ - <span id="display-name">Livreur</span></header>
+    <div id="tasks-section">
+        <header>
+            <div class="driver-info">
+                <div class="status-dot"></div>
+                <span id="driver-display" style="font-weight:900;">...</span>
+            </div>
+            <div class="rainbow-text" style="font-size:14px;">Pizza Salsabil</div>
+        </header>
 
-<div class="admin-bar">
-    <a href="tel:0000000000" style="text-decoration:none; color:var(--d); font-weight:bold; font-size: 14px;">📞 Appeler Manager</a>
-    <span style="color:#ddd;">|</span>
-    <button onclick="logout()" style="border:none; background:none; color:var(--r); font-family:'Cairo'; font-weight:bold; cursor:pointer; font-size: 14px;">🚪 Déconnexion</button>
-</div>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span id="order-count">0</span>
+                <b>الطلبات</b>
+            </div>
+            <div class="stat-item">
+                <span>الحالة</span>
+                <b style="font-size:14px; color:var(--green)">متصل</b>
+            </div>
+        </div>
 
-<div id="driver-tasks"></div>
+        <div id="orders-list">
+            <div class="loader" style="display:block;"></div>
+        </div>
 
-<div id="chatBox">
-    <div style="background:var(--p); color:white; padding:15px; text-align:center; font-weight:bold; font-size: 16px;">💬 Chat Manager</div>
-    <div id="chatMessages"></div>
-    <div style="padding:12px; display:flex; gap:10px; border-top:1px solid #eee; background: white;">
-        <input type="text" id="msgInput" placeholder="Message..." style="flex:1; border:1px solid #ddd; border-radius:25px; padding:10px 15px; outline:none; font-family:'Cairo';">
-        <button onclick="sendMsg()" style="background:var(--p); color:white; border:none; border-radius:50%; width:45px; height:40px; cursor:pointer; font-size: 18px;">➔</button>
+        <div class="messenger-fab" onclick="toggleChat()">
+            <i class="fab fa-facebook-messenger"></i>
+        </div>
+        <div id="chat-window" class="chat-window">
+            <div style="background:var(--messenger); padding:15px; text-align:center; font-weight:bold;">مركز الرسائل</div>
+            <div class="chat-messages" id="chat-box" style="display:flex; flex-direction:column;"></div>
+            <div style="padding:10px; background:#1a1a1a; display:flex; gap:10px;">
+                <input type="text" id="msg-input" placeholder="اكتب هنا..." style="margin:0; padding:10px; border-radius:10px;">
+                <button onclick="sendMsg()" style="background:var(--messenger); border:none; color:white; padding:10px; border-radius:10px; width:50px;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
     </div>
-</div>
-
-<button class="chat-toggle" onclick="toggleChat()">💬</button>
 
 <script>
-    /* الكود المصدري الأصلي كما هو دون أي تغيير */
-    const dbBase = "https://aman-audoi-default-rtdb.firebaseio.com";
-    let myName = localStorage.getItem('aman_driver_name') || "";
+    const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    async function attemptLogin() {
-        const inputName = document.getElementById('driverNameInput').value.trim();
-        const status = document.getElementById('login-status');
-        if(!inputName) return;
+    window.onload = () => {
+        const saved = localStorage.getItem('currentDriver');
+        if(saved) { showTasks(saved); }
+    };
 
-        status.innerText = "Vérification en cours...";
-        
-        try {
-            const res = await fetch(`${dbBase}/auth_drivers/${inputName}.json`);
-            const data = await res.json();
+    function login() {
+        const user = document.getElementById('user-input').value.trim().toLowerCase();
+        const pass = document.getElementById('pass-input').value;
+        const loader = document.getElementById('loader');
+        const err = document.getElementById('error-msg');
 
-            if(data && data.access === "granted") {
-                localStorage.setItem('aman_driver_name', inputName);
-                myName = inputName;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('display-name').innerText = myName;
-                initApp();
+        if(!user || !pass) return;
+        loader.style.display = "block";
+
+        db.ref('drivers/' + user).once('value', snap => {
+            loader.style.display = "none";
+            if(snap.exists() && snap.val().password === pass) {
+                const name = snap.val().name || user;
+                localStorage.setItem('currentDriver', name);
+                showTasks(name);
             } else {
-                status.innerText = "Accès refusé. Contactez le gérant.";
+                err.innerText = "بيانات الدخول غير صحيحة!";
+                err.style.display = "block";
             }
-        } catch(e) { status.innerText = "Erreur de connexion."; }
-    }
-
-    function initApp() {
-        if(!myName) return;
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('display-name').innerText = myName;
-        loadTasks(); loadMsgs(); startLocationTracking();
-        setInterval(loadTasks, 10000); setInterval(loadMsgs, 3000); setInterval(updateLocation, 20000); 
-    }
-
-    async function loadTasks() {
-        const res = await fetch(`${dbBase}/orders.json`);
-        const data = await res.json();
-        const container = document.getElementById('driver-tasks');
-        container.innerHTML = "";
-        if(!data) { container.innerHTML = "<div style='text-align:center; margin-top:50px;'><span style='font-size:50px;'>😴</span><p style='color:#999;'>Aucune commande disponible</p></div>"; return; }
-        Object.keys(data).reverse().forEach(id => {
-            const o = data[id];
-            const mapURL = `https://www.google.com/maps/search/?api=1&query=${o.location.lat},${o.location.lon}`;
-            container.innerHTML += `<div class="card"><b style="color:var(--p); font-size:18px;">👤 Client: ${o.customerName}</b><p style="margin:10px 0; font-weight:bold;">🍕 Commande: <span style="color:var(--d)">${o.orderItem}</span></p><a href="${mapURL}" class="btn btn-map" target="_blank">🗺️ Ouvrir GPS</a><a href="tel:${o.phone}" class="btn btn-call">📞 Appeler Client</a></div>`;
         });
     }
 
-    function toggleChat() { const b = document.getElementById('chatBox'); b.style.display = b.style.display === 'flex' ? 'none' : 'flex'; if(b.style.display === 'flex') loadMsgs(); }
-    async function sendMsg() { const input = document.getElementById('msgInput'); if(!input.value) return; const msg = { sender: myName, text: input.value, time: new Date().toLocaleTimeString() }; await fetch(`${dbBase}/chats/${myName}.json`, { method: 'POST', body: JSON.stringify(msg) }); input.value = ""; loadMsgs(); }
-    async function loadMsgs() { if(!myName) return; const res = await fetch(`${dbBase}/chats/${myName}.json`); const data = await res.json(); const container = document.getElementById('chatMessages'); container.innerHTML = ""; if(data) { Object.values(data).forEach(m => { const isMe = m.sender === myName; container.innerHTML += `<div class="msg ${isMe ? 'msg-driver' : 'msg-admin'}">${m.text}</div>`; }); container.scrollTop = container.scrollHeight; } }
-    function startLocationTracking() { if (navigator.geolocation) { updateLocation(); } }
-    function updateLocation() { navigator.geolocation.getCurrentPosition(async (pos) => { const loc = { lat: pos.coords.latitude, lon: pos.coords.longitude, lastSeen: new Date().toLocaleTimeString() }; await fetch(`${dbBase}/drivers/${myName}/location.json`, { method: 'PUT', body: JSON.stringify(loc) }); }); }
-    function logout() { localStorage.removeItem('aman_driver_name'); location.reload(); }
-    if(myName) initApp();
+    function showTasks(name) {
+        document.getElementById('login-section').style.display = "none";
+        document.getElementById('tasks-section').style.display = "block";
+        document.getElementById('driver-display').innerText = name;
+        loadOrders();
+        loadChat(name);
+    }
+
+    function loadOrders() {
+        db.ref('orders').on('value', snap => {
+            const list = document.getElementById('orders-list');
+            const countDisp = document.getElementById('order-count');
+            list.innerHTML = "";
+            const data = snap.val();
+            
+            if(!data) { 
+                list.innerHTML = "<p style='text-align:center; color:#555; margin-top:50px;'>لا توجد طلبات نشطة حالياً</p>"; 
+                countDisp.innerText = "0";
+                return; 
+            }
+
+            const keys = Object.keys(data);
+            countDisp.innerText = keys.length;
+
+            keys.forEach(id => {
+                const o = data[id];
+                list.innerHTML += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div>
+                                <div class="cust-name">${o.customer}</div>
+                                <div style="font-size:12px; color:#888;">📦 طلب جديد</div>
+                            </div>
+                            <div class="order-price">${o.total} DZD</div>
+                        </div>
+                        <div class="action-btns">
+                            <a href="tel:${o.phone}" class="btn-call"><i class="fas fa-phone"></i> اتصال</a>
+                            <a href="${o.location}" target="_blank" class="btn-gps"><i class="fas fa-location-arrow"></i> الموقع</a>
+                        </div>
+                        <button onclick="finishOrder('${id}')" class="btn-done">تم التوصيل واستلام المبلغ ✅</button>
+                    </div>`;
+            });
+        });
+    }
+
+    function finishOrder(id) {
+        if(confirm("هل أنت متأكد من إتمام العملية؟")) {
+            db.ref('orders/' + id).remove();
+        }
+    }
+
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    function loadChat(driverName) {
+        db.ref('delivery_chat').limitToLast(20).on('value', snap => {
+            const box = document.getElementById('chat-box');
+            box.innerHTML = "";
+            snap.forEach(c => {
+                const m = c.val();
+                const type = (m.user === "الإدارة") ? "admin" : "me";
+                box.innerHTML += `<div class="msg ${type}"><b>${m.user}:</b><br>${m.text}</div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    function sendMsg() {
+        const txt = document.getElementById('msg-input').value;
+        const driverName = localStorage.getItem('currentDriver');
+        if(txt) {
+            db.ref('delivery_chat').push({ user: driverName, text: txt });
+            document.getElementById('msg-input').value = "";
+        }
+    }
 </script>
 </body>
-            </html>
+    </html>
