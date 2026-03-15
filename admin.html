@@ -3,361 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Espace Propriétaire - Aman Electronics</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Poppins:wght@600&display=swap" rel="stylesheet">
+    <title>إدارة بيتزا سلسبيل - الإصدار الشامل</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --p: #e67e22; --d: #2c3e50; --g: #27ae60; --r: #e74c3c; --bl: #3498db; --bg: #f0f2f5; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); margin: 0; padding-bottom: 80px; direction: rtl; }
+        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #2ecc71; --red: #e74c3c; --messenger: #0084ff; --gold: #ffd700; }
+        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 15px; direction: rtl; }
         
-        /* شاشة القفل */
-        #admin-lock { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); z-index: 10000; display: flex; justify-content: center; align-items: center; }
-        .lock-card { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .lock-card h2 { color: var(--d); margin-bottom: 20px; font-size: 20px; }
-        .lock-card input { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #eee; text-align: center; font-size: 20px; margin-bottom: 15px; outline: none; box-sizing: border-box;}
+        /* شاشة الدخول */
+        #login-overlay { position: fixed; inset: 0; background: var(--dark); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); width: 100%; max-width: 350px; text-align: center; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .settings-gear { font-size: 28px; cursor: pointer; color: var(--gold); }
         
-        header { 
-            background: var(--d); color: white; padding: 20px 15px; text-align: center; 
-            border-bottom: 4px solid var(--p); position: sticky; top: 0; z-index: 1000; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center;
-        }
-        header .title { font-family: 'Poppins', sans-serif; font-size: 18px; flex-grow: 1; }
+        .rainbow-title { font-weight: 900; font-size: 20px; text-align: center; background: linear-gradient(to right, #ff2400, #e8b21d, #1de840, #1ddde8, #2b1de8, #dd00f3); background-size: 400%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 8s linear infinite; margin: 10px 0; }
+        @keyframes rainbow { 0% { background-position: 0%; } 100% { background-position: 400%; } }
+
+        #admin-panel { display: none; background: var(--card); border-radius: 20px; border: 1px solid #333; padding: 15px; margin-bottom: 20px; }
+        .tabs-menu { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; scrollbar-width: none; }
+        .tab-link { background: #222; padding: 8px 15px; border-radius: 10px; white-space: nowrap; cursor: pointer; font-size: 12px; border: 1px solid transparent; color: #fff; }
+        .tab-link.active { border-color: var(--gold); color: var(--gold); background: #000; }
         
-        .settings-icon { font-size: 24px; cursor: pointer; transition: 0.3s; padding: 5px; }
-        .settings-icon:hover { transform: rotate(90deg); color: var(--p); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        #settings-panel, #new-item-modal { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; 
-        }
-        .panel-content { 
-            background: white; width: 90%; max-width: 400px; padding: 20px; border-radius: 20px; 
-            max-height: 85vh; overflow-y: auto; position: relative;
-        }
-        .close-panel { position: absolute; top: 10px; left: 15px; font-size: 20px; cursor: pointer; color: var(--r); font-weight: bold; }
-
-        .container { padding: 10px; max-width: 500px; margin: auto; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-family: 'Cairo'; }
+        button { width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; margin-top: 5px; transition: 0.3s; }
+        button:active { transform: scale(0.95); }
         
-        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--d); color: white; z-index: 5000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #start-btn { background: var(--p); color: white; border: none; padding: 18px 35px; border-radius: 30px; font-size: 20px; font-weight: bold; cursor: pointer; }
-
-        .manager-box { background: #f9f9f9; padding: 15px; border-radius: 15px; border: 1px solid #ddd; margin-top: 10px; }
+        .order-box { background: #1e1e1e; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #444; }
+        .btn-group { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-action { flex: 1; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 11px; font-weight: bold; color: #000; display: flex; align-items: center; justify-content: center; }
         
-        input, select { 
-            width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; 
-            border: 1px solid #ddd; font-family: 'Cairo'; box-sizing: border-box;
-        }
-
-        .btn { padding: 10px; border: none; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; text-align: center; color: white; transition: 0.3s; font-size: 13px; }
-        .btn-add { background: var(--g); width: 100%; margin-top: 10px; }
-        .btn-del { background: var(--r); width: 100%; }
-
-        .promo-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; gap: 10px; }
-        .promo-img-box { width: 50px; height: 50px; border-radius: 10px; background-size: cover; background-position: center; flex-shrink: 0; background-color: #ddd; }
-        .toggle-btn { padding: 4px 8px; font-size: 9px; border-radius: 5px; border: none; color: white; cursor: pointer; }
-        .on-p { background: var(--r); } .on-n { background: var(--bl); } .off { background: #ccc; }
-
-        .order-card { background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; border-right: 6px solid var(--p); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .price-item { background: #222; padding: 10px; margin-top: 8px; border-radius: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; }
+        .price-item img { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; border: 1px solid #444; }
+        .price-item input { margin: 0; padding: 5px; width: 75px; text-align: center; }
         
-        #chatBox { display:none; position:fixed; bottom:90px; right:20px; width:300px; height:400px; background:white; border-radius:15px; box-shadow:0 5px 20px rgba(0,0,0,0.2); z-index:2000; flex-direction:column; overflow:hidden; border: 1px solid var(--p); }
-        #chatMessages { flex:1; padding:10px; overflow-y:auto; display:flex; flex-direction:column; gap:8px; }
-        .msg { padding: 8px 12px; border-radius: 15px; max-width: 80%; font-size: 12px; }
-        .msg-admin { align-self: flex-end; background: var(--p); color: white; }
-        .msg-driver { align-self: flex-start; background: #eee; color: #333; }
-        .chat-toggle { position:fixed; bottom:20px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--p); color:white; border:none; box-shadow:0 4px 10px rgba(0,0,0,0.3); font-size:24px; z-index:2000; cursor:pointer; }
+        .driver-status { background: #111; padding: 12px; border-radius: 15px; margin-top: 10px; border: 1px solid #333; }
+        .status-dot { height: 10px; width: 10px; background-color: var(--green); border-radius: 50%; display: inline-block; margin-left: 8px; box-shadow: 0 0 8px var(--green); }
     </style>
 </head>
 <body>
 
-<div id="admin-lock">
-    <div class="lock-card">
-        <h2>🔒 Aman Electronics</h2>
-        <input type="password" id="pass-input" placeholder="كلمة السر">
-        <button class="btn" style="background:var(--p); width:100%; font-size:18px;" onclick="checkPassword()">دخول</button>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color:var(--gold)">🔐 إدارة Aman Electronics</h2>
+            <p style="color: #888; font-size: 12px;">أدخل كلمة المرور للمتابعة</p>
+            <input type="password" id="admin-pass-input" placeholder="كلمة المرور">
+            <button onclick="checkAdminPass()" style="background:var(--gold); color:#000;">دخول النظام</button>
+        </div>
     </div>
-</div>
 
-<div id="start-overlay" style="display:none;">
-    <div style="font-family: 'Poppins'; font-size: 24px; margin-bottom: 10px;">AMAN PIZZA ADMIN</div>
-    <button id="start-btn" onclick="startAdmin()">ACTIVER LE SYSTÈME 🔔</button>
-</div>
+    <header>
+        <div class="settings-gear" onclick="toggleAdmin()">⚙️</div>
+        <div style="font-weight: 900; color: var(--main); letter-spacing: 1px;">PIZZA SALSABIL</div>
+    </header>
 
-<header>
-    <div class="settings-icon" onclick="toggleSettings()">⚙️</div>
-    <div class="title">🍕 Espace Propriétaire</div>
-    <div style="width: 30px; font-size: 20px; cursor: pointer;" onclick="openNewItemModal()">➕</div> 
-</header>
+    <div class="rainbow-title">لوحة التحكم الاحترافية</div>
 
-<div id="settings-panel">
-    <div class="panel-content">
-        <span class="close-panel" onclick="toggleSettings()">✕</span>
-        <h3 style="text-align:center;">⚙️ لوحة التحكم</h3>
-        
-        <div class="manager-box" style="border-bottom: 3px solid var(--p);">
-            <b>🔑 تغيير كلمة سر الدخول:</b>
-            <input type="password" id="new-sys-pass" placeholder="كلمة السر الجديدة">
-            <button class="btn" style="background:var(--p); width:100%;" onclick="changeSystemPassword()">تحديث كلمة السر</button>
+    <div id="admin-panel">
+        <div class="tabs-menu">
+            <div class="tab-link active" onclick="openTab(event, 'tab-items')">الأطباق</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-prices')">الأسعار والصور</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-drivers')">السائقين والتتبع</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-settings')">إعدادات النظام</div>
         </div>
 
-        <div class="manager-box" style="border-right: 4px solid var(--bl);">
-            <b>🍔 إدارة قائمة الطعام:</b>
-            <div id="promo-manager" style="max-height: 150px; overflow-y: auto; margin-top: 10px;"></div>
+        <div id="tab-items" class="tab-content active">
+            <input type="text" id="p-name" placeholder="اسم الطبق">
+            <input type="number" id="p-price" placeholder="السعر">
+            <a href="https://imgbb.com/" target="_blank" style="color:var(--gold); font-size:12px; display:block; text-align:center; margin-bottom:5px;">ارفع الصورة هنا ثم انسخ الرابط المباشر 📸</a>
+            <input type="text" id="p-img" placeholder="رابط الصورة المباشر">
+            <select id="p-cat">
+                <option value="بيتزا">🍕 بيتزا</option>
+                <option value="برغر">🍔 برغر</option>
+                <option value="سندوتش">🥪 سندوتش</option>
+                <option value="مملحات">🥐 مملحات</option>
+                <option value="مشروبات">🥤 مشروبات</option>
+            </select>
+            <button onclick="addProduct()" style="background:var(--main); color:white;">إضافة إلى المنيو +</button>
         </div>
 
-        <div class="manager-box">
-            <b>🚚 السائقين:</b>
-            <select id="driverList" onchange="switchDriver()"></select>
-            <div style="display: flex; gap: 5px;">
-                <button class="btn btn-del" style="flex:1" onclick="deleteCurrentDriver()">حذف</button>
-                <button class="btn" style="background:var(--bl); flex:1" onclick="trackDriver()">تتبع</button>
+        <div id="tab-prices" class="tab-content">
+            <input type="text" id="menu-search" placeholder="ابحث باسم الطبق..." oninput="searchMenu()">
+            <div id="search-results" style="max-height: 300px; overflow-y: auto;"></div>
+        </div>
+
+        <div id="tab-drivers" class="tab-content">
+            <h4 style="color:var(--gold)">🛵 السائقين المتصلين الآن</h4>
+            <div id="live-drivers"></div>
+            <hr style="border:0.5px solid #333; margin:20px 0;">
+            <h4 style="color:var(--gold)">👤 تسجيل سائق جديد</h4>
+            <input type="text" id="driver-name-new" placeholder="اسم السائق الجديد">
+            <input type="password" id="driver-pass-new" placeholder="كلمة سر السائق">
+            <button onclick="addDriver()" style="background:var(--messenger); color:#fff;">تسجيل سائق جديد</button>
+            <h4 style="color:var(--red); margin-top:15px;">🔒 إدارة الصلاحيات (حذف السائق)</h4>
+            <div id="registered-drivers-list"></div>
+        </div>
+
+        <div id="tab-settings" class="tab-content">
+            <h4 style="color:var(--gold)">🛠️ التحكم في الوظائف</h4>
+            <div style="background:#222; padding:12px; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:13px;">تأكيد طلب الزبون عبر الواتساب:</span>
+                <select id="wa-status" style="width: auto; margin:0;">
+                    <option value="on">مفعّل ✅</option>
+                    <option value="off">معطّل ❌</option>
+                </select>
             </div>
-        </div>
-
-        <div class="manager-box" style="border-top: 3px solid var(--g);">
-            <b>➕ إضافة سائق جديد:</b>
-            <input type="text" id="newName" placeholder="الاسم">
-            <input type="tel" id="newPhone" placeholder="الهاتف">
-            <button class="btn btn-add" onclick="addNewDriver()">حفظ ومنح الصلاحية</button>
+            <input type="text" id="admin-whatsapp" placeholder="رقم واتساب الاستلام (213...)">
+            <input type="text" id="new-rip" placeholder="رقم RIP بريدي موب">
+            <input type="text" id="admin-new-pass" placeholder="تغيير كلمة سر الإدارة">
+            <button onclick="saveAdminSettings()" style="background:var(--green); color:#000;">حفظ كل التغييرات 💾</button>
         </div>
     </div>
-</div>
 
-<div id="new-item-modal">
-    <div class="panel-content">
-        <span class="close-panel" onclick="closeNewItemModal()">✕</span>
-        <h3 style="text-align:center;">✨ إضافة وجبة</h3>
-        <input type="text" id="foodName" placeholder="اسم الوجبة">
-        <input type="number" id="foodPrice" placeholder="السعر">
-        <select id="foodCat">
-            <option value="pizza">بيتزا 🍕</option>
-            <option value="sand">سندويش 🥪</option>
-            <option value="burger">برغر 🍔</option>
-        </select>
-        <input type="file" id="foodImgFile" accept="image/*">
-        <p id="uploadStatus" style="font-size:10px; color:var(--g); display:none; text-align:center;">جاري الضغط والمزامنة...</p>
-        <button class="btn btn-add" id="saveBtn" onclick="saveNewFood()">حفظ ونشر للزبائن</button>
-    </div>
-</div>
-
-<div class="container">
-    <div id="orders-list"></div>
-</div>
-
-<div id="chatBox">
-    <div style="background:var(--p); color:white; padding:10px; display:flex; justify-content:space-between;">
-        <b id="chatTitle">الدردشة</b>
-        <button onclick="clearChat()" style="background:none; border:none; color:white; font-size:10px;">مسح</button>
-    </div>
-    <div id="chatMessages"></div>
-    <div style="padding:10px; display:flex; gap:5px; border-top:1px solid #eee;">
-        <input type="text" id="msgInput" placeholder="رسالة...">
-        <button onclick="sendMsg()" style="background:var(--p); color:white; border:none; border-radius:50%; width:35px;">⬅️</button>
-    </div>
-</div>
-<button class="chat-toggle" onclick="toggleChat()">💬</button>
-
-<canvas id="canvas" style="display:none;"></canvas>
+    <h4 style="padding: 0 10px; color: var(--gold);">📦 الطلبات الواردة :</h4>
+    <div id="orders-display" style="padding:10px;"></div>
 
 <script>
-    const dbBase = "https://aman-audoi-default-rtdb.firebaseio.com";
-    let lastOrdersHash = "";
-    let drivers = JSON.parse(localStorage.getItem('amanDrivers')) || [];
+    const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // نظام كلمة السر
-    function checkPassword() {
-        const savedPass = localStorage.getItem('adminPass') || '1234'; // الافتراضية 1234
-        const inputPass = document.getElementById('pass-input').value;
-        if(inputPass === savedPass) {
-            document.getElementById('admin-lock').style.display = 'none';
-            document.getElementById('start-overlay').style.display = 'flex';
+    let dbPass = "1234";
+    db.ref('settings/admin_auth/pass').on('value', s => { if(s.exists()) dbPass = s.val(); });
+    
+    function checkAdminPass() {
+        const input = document.getElementById('admin-pass-input').value;
+        if(input === dbPass.toString()) {
+            document.getElementById('login-overlay').style.display = 'none';
         } else {
-            alert("كلمة السر خاطئة!");
+            alert("❌ كلمة المرور غير صحيحة");
         }
     }
 
-    function changeSystemPassword() {
-        const newPass = document.getElementById('new-sys-pass').value;
-        if(newPass.length < 4) return alert("كلمة السر يجب أن تكون 4 أرقام أو أكثر");
-        localStorage.setItem('adminPass', newPass);
-        alert("تم تغيير كلمة السر بنجاح ✅");
-        location.reload();
+    function toggleAdmin() { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display==='block')?'none':'block'; }
+    
+    function openTab(evt, t) {
+        let contents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < contents.length; i++) contents[i].classList.remove("active");
+        let links = document.getElementsByClassName("tab-link");
+        for (let i = 0; i < links.length; i++) links[i].classList.remove("active");
+        document.getElementById(t).classList.add("active");
+        evt.currentTarget.classList.add("active");
     }
 
-    function startAdmin() {
-        document.getElementById('start-overlay').style.display = 'none';
-        renderDriverList();
-        fetchOrders();
-        fetchPromoMenu();
-        setInterval(fetchOrders, 4000);
-        setInterval(loadChat, 3000);
-        setInterval(fetchPromoMenu, 5000);
-    }
+    let menuData = {};
+    db.ref('menu').on('value', s => { menuData = s.val() || {}; searchMenu(); });
 
-    /* باقي الوظائف (بدون تغيير) */
-    async function fetchPromoMenu() {
-        try {
-            const res = await fetch(`${dbBase}/menu.json?t=${Date.now()}`);
-            const data = await res.json();
-            const container = document.getElementById('promo-manager');
-            if (!data) return;
-            container.innerHTML = "";
-            Object.keys(data).forEach(id => {
-                const item = data[id];
-                container.innerHTML += `
-                    <div class="promo-item">
-                        <div class="promo-img-box" style="background-image: url('${item.img}')"></div>
-                        <div style="flex:1; font-size:11px;"><b>${item.name}</b></div>
-                        <button class="toggle-btn ${item.isPromo?'on-p':'off'}" onclick="tglM('${id}','isPromo',${!item.isPromo})">P</button>
-                        <button class="toggle-btn ${item.isNew?'on-n':'off'}" onclick="tglM('${id}','isNew',${!item.isNew})">N</button>
-                        <span onclick="delF('${id}')" style="cursor:pointer">🗑️</span>
-                    </div>`;
-            });
-        } catch(e){}
-    }
-
-    async function saveNewFood() {
-        const name = document.getElementById('foodName').value;
-        const price = document.getElementById('foodPrice').value;
-        const cat = document.getElementById('foodCat').value;
-        const file = document.getElementById('foodImgFile').files[0];
-        if(!name || !price || !file) return alert("أكمل البيانات!");
-        document.getElementById('uploadStatus').style.display = 'block';
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = function() {
-            const img = new Image();
-            img.src = reader.result;
-            img.onload = async function() {
-                const canvas = document.getElementById('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = 400; canvas.height = 400; 
-                ctx.drawImage(img, 0, 0, 400, 400);
-                const finalImg = canvas.toDataURL('image/jpeg', 0.5);
-                const id = "p_" + Date.now();
-                await fetch(`${dbBase}/menu/${id}.json`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ name, price: parseInt(price), cat, img: finalImg, isPromo: false, isNew: true })
-                });
-                document.getElementById('uploadStatus').style.display = 'none';
-                closeNewItemModal(); fetchPromoMenu();
-            }
-        };
-    }
-
-    async function tglM(id, field, val) { 
-        await fetch(`${dbBase}/menu/${id}/${field}.json`, { method: 'PUT', body: JSON.stringify(val) });
-        fetchPromoMenu();
-    }
-
-    async function delF(id) { if(confirm("حذف؟")) { await fetch(`${dbBase}/menu/${id}.json`, { method: 'DELETE' }); fetchPromoMenu(); } }
-
-    function renderDriverList() {
-        const select = document.getElementById('driverList');
-        select.innerHTML = drivers.length ? "" : "<option value=''>لا يوجد</option>";
-        drivers.forEach(d => { select.innerHTML += `<option value="${d.phone}">${d.name}</option>`; });
-        switchDriver();
-    }
-
-    async function addNewDriver() {
-        const name = document.getElementById('newName').value.trim();
-        const phone = document.getElementById('newPhone').value.trim();
-        if(!name || !phone) return alert("أدخل البيانات!");
-        await fetch(`${dbBase}/auth_drivers/${name}.json`, { method: 'PUT', body: JSON.stringify({ access: "granted" }) });
-        drivers.push({ name, phone });
-        localStorage.setItem('amanDrivers', JSON.stringify(drivers));
-        renderDriverList();
-        alert("تمت الإضافة ✅");
-    }
-
-    async function deleteCurrentDriver() {
-        const select = document.getElementById('driverList');
-        if(drivers.length === 0) return;
-        const name = select.options[select.selectedIndex].text;
-        if(confirm(`طرد ${name}؟`)) {
-            await fetch(`${dbBase}/auth_drivers/${name}.json`, { method: 'DELETE' });
-            drivers.splice(select.selectedIndex, 1);
-            localStorage.setItem('amanDrivers', JSON.stringify(drivers));
-            renderDriverList();
-        }
-    }
-
-    function switchDriver() {
-        const select = document.getElementById('driverList');
-        if(drivers.length > 0 && select.value !== "") {
-            document.getElementById('chatTitle').innerText = "دردشة: " + select.options[select.selectedIndex].text;
-            loadChat();
-        }
-    }
-
-    async function fetchOrders() {
-        try {
-            const res = await fetch(`${dbBase}/orders.json?t=${Date.now()}`);
-            const data = await res.json();
-            const currentHash = JSON.stringify(data);
-            if (currentHash === lastOrdersHash) return;
-            const container = document.getElementById('orders-list');
-            container.innerHTML = data ? "" : "<p style='text-align:center; color:#999;'>لا توجد طلبات</p>";
-            if(data) Object.keys(data).reverse().forEach(id => {
-                const o = data[id];
-                container.innerHTML += `
-                    <div class="order-card">
-                        <b>👤 ${o.customer || o.customerName}</b>
-                        <p>🍕 الإجمالي: <span style="color:var(--p)">${o.total} DZD</span></p>
-                        <div style="display:flex; gap:5px;">
-                            <a href="tel:${o.phone}" class="btn" style="background:var(--g); flex:1;">إتصال</a>
-                            <button class="btn" style="background:var(--r); flex:1;" onclick="deleteOrder('${id}')">تم ✅</button>
+    function searchMenu() {
+        const q = document.getElementById('menu-search').value.toLowerCase();
+        const res = document.getElementById('search-results'); res.innerHTML = "";
+        for (let id in menuData) {
+            if (menuData[id].name.toLowerCase().includes(q)) {
+                res.innerHTML += `
+                    <div class="price-item">
+                        <img src="${menuData[id].img || 'https://via.placeholder.com/60'}">
+                        <div style="flex:1;">
+                            <div style="font-size:14px; font-weight:bold;">${menuData[id].name}</div>
+                            <div style="font-size:11px; color:#888;">${menuData[id].category}</div>
+                        </div>
+                        <input type="number" id="inp-${id}" value="${menuData[id].price}">
+                        <div style="display:flex; flex-direction:column; gap:4px;">
+                            <button onclick="updatePrice('${id}')" style="background:var(--green); color:#000; padding:4px 8px; font-size:10px;">تحديث</button>
+                            <button onclick="db.ref('menu/${id}').remove()" style="background:var(--red); color:#fff; padding:4px 8px; font-size:10px;">حذف</button>
                         </div>
                     </div>`;
-            });
-            lastOrdersHash = currentHash;
-        } catch (e) {}
-    }
-
-    async function trackDriver() {
-        const select = document.getElementById('driverList');
-        if(drivers.length === 0) return;
-        const name = select.options[select.selectedIndex].text;
-        const res = await fetch(`${dbBase}/drivers/${name}/location.json`);
-        const loc = await res.json();
-        if(loc) window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lon}`, '_blank');
-        else alert("GPS السائق غير نشط");
-    }
-
-    async function sendMsg() {
-        const select = document.getElementById('driverList');
-        const input = document.getElementById('msgInput');
-        if(!input.value || drivers.length === 0) return;
-        const name = select.options[select.selectedIndex].text;
-        await fetch(`${dbBase}/chats/${name}.json`, { method: 'POST', body: JSON.stringify({ sender: 'المدير', text: input.value }) });
-        input.value = ""; loadChat();
-    }
-
-    async function loadChat() {
-        const select = document.getElementById('driverList');
-        if(drivers.length === 0) return;
-        const name = select.options[select.selectedIndex].text;
-        const res = await fetch(`${dbBase}/chats/${name}.json`);
-        const data = await res.json();
-        const container = document.getElementById('chatMessages');
-        container.innerHTML = "";
-        if(data) {
-            Object.values(data).forEach(m => {
-                container.innerHTML += `<div class="msg ${m.sender === 'المدير' ? 'msg-admin' : 'msg-driver'}">${m.text}</div>`;
-            });
-            container.scrollTop = container.scrollHeight;
+            }
         }
     }
 
-    function toggleSettings() { const p = document.getElementById('settings-panel'); p.style.display = (p.style.display === 'flex') ? 'none' : 'flex'; }
-    function openNewItemModal() { document.getElementById('new-item-modal').style.display = 'flex'; }
-    function closeNewItemModal() { document.getElementById('new-item-modal').style.display = 'none'; }
-    function toggleChat() { const b = document.getElementById('chatBox'); b.style.display = (b.style.display === 'flex') ? 'none' : 'flex'; }
-    async function deleteOrder(id) { if(confirm("حذف؟")) { await fetch(`${dbBase}/orders/${id}.json`, { method: 'DELETE' }); fetchOrders(); } }
-    async function clearChat() { 
-        const select = document.getElementById('driverList');
-        if(select.selectedIndex < 0) return;
-        const name = select.options[select.selectedIndex].text;
-        await fetch(`${dbBase}/chats/${name}.json`, { method: 'DELETE' }); loadChat(); 
+    function updatePrice(id) {
+        const newP = document.getElementById('inp-'+id).value;
+        db.ref('menu/' + id).update({ price: parseInt(newP) }).then(() => alert("تم التحديث ✅"));
     }
+
+    function addProduct() {
+        const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, 
+              img = document.getElementById('p-img').value, c = document.getElementById('p-cat').value;
+        if(n && p) {
+            db.ref('menu').push({name:n, price:parseInt(p), img:img, category:c}).then(()=>{
+                alert("تمت الإضافة ✅");
+                document.getElementById('p-name').value = ""; document.getElementById('p-price').value = "";
+            });
+        }
+    }
+
+    function addDriver() {
+        const n = document.getElementById('driver-name-new').value, p = document.getElementById('driver-pass-new').value;
+        if(n && p) db.ref('drivers_list').push({name:n, pass:p}).then(()=>alert("تم تسجيل السائق"));
+    }
+
+    // عرض السائقين المسجلين للحذف والمنع (الإضافة الجديدة)
+    db.ref('drivers_list').on('value', s => {
+        const div = document.getElementById('registered-drivers-list'); div.innerHTML = "";
+        s.forEach(d => {
+            const v = d.val();
+            div.innerHTML += `
+                <div style="background:#222; padding:10px; border-radius:10px; margin-top:5px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🛵 ${v.name}</span>
+                    <button onclick="removeDriver('${d.key}', '${v.name}')" style="background:var(--red); color:white; width:auto; padding:5px 10px; font-size:10px;">حذف ومنع 🗑️</button>
+                </div>`;
+        });
+    });
+
+    function removeDriver(key, name) {
+        if(confirm("هل تريد حذف السائق ومنعه من الدخول نهائياً؟")) {
+            db.ref('drivers_list/' + key).remove();
+            db.ref('drivers_live/' + name).remove();
+            alert("تم الحذف.");
+        }
+    }
+
+    db.ref('drivers_live').on('value', s => {
+        const div = document.getElementById('live-drivers'); div.innerHTML = "";
+        s.forEach(d => {
+            const v = d.val();
+            div.innerHTML += `
+                <div class="driver-status">
+                    <span class="status-dot"></span> <b>${v.name}</b> 
+                    <small style="float:left; color:#888;">${v.lastSeen || ''}</small>
+                    <div class="btn-group">
+                        <a href="https://www.google.com/maps?q=${v.lat},${v.lng}" target="_blank" class="btn-action" style="background:var(--gold)">موقعه الآن 📍</a>
+                    </div>
+                </div>`;
+        });
+    });
+
+    db.ref('orders').on('value', s => {
+        const d = document.getElementById('orders-display'); d.innerHTML = "";
+        s.forEach(o => {
+            const v = o.val();
+            d.innerHTML += `
+                <div class="order-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <b style="font-size:17px; color:var(--gold);">👤 ${v.customer}</b>
+                        <b style="color:var(--green);">${v.total} DZD</b>
+                    </div>
+                    <p style="font-size:13px; color:#ccc; margin:8px 0;">📱 ${v.phone} | 🔑 كود: ${v.authCode || '----'}</p>
+                    <div class="btn-group">
+                        <a href="tel:${v.phone}" class="btn-action" style="background:var(--green)">اتصال 📞</a>
+                        <a href="https://wa.me/213${v.phone.substring(1)}" class="btn-action" style="background:#25d366; color:#fff">واتساب 💬</a>
+                        <a href="${v.location}" target="_blank" class="btn-action" style="background:#444; color:#fff">الموقع 📍</a>
+                    </div>
+                    <button onclick="db.ref('orders/${o.key}').remove()" style="margin-top:12px; background:none; border:1px solid #444; color:var(--red); font-size:11px; width:100%;">إكمال التوصيل (حذف الطلب)</button>
+                </div>`;
+        });
+    });
+
+    function saveAdminSettings() {
+        db.ref('settings/wa_status').set(document.getElementById('wa-status').value);
+        db.ref('settings/whatsapp_number').set(document.getElementById('admin-whatsapp').value);
+        db.ref('settings/rip_account').set(document.getElementById('new-rip').value);
+        const pass = document.getElementById('admin-new-pass').value;
+        if(pass) db.ref('settings/admin_auth/pass').set(pass);
+        alert("تم الحفظ بنجاح ✅");
+    }
+
+    db.ref('settings/wa_status').on('value', s => { if(s.exists()) document.getElementById('wa-status').value = s.val(); });
+    db.ref('settings/whatsapp_number').on('value', s => { if(s.exists()) document.getElementById('admin-whatsapp').value = s.val(); });
+    db.ref('settings/rip_account').on('value', s => { if(s.exists()) document.getElementById('new-rip').value = s.val(); });
+
 </script>
 </body>
     </html>
+                
