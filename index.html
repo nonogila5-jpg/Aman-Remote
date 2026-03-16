@@ -101,12 +101,12 @@
 
     let cart = {}; let total = 0; let authCode = ""; let myWA = ""; let base64Img = "";
 
-    // جلب الإعدادات المحدثة من الإدارة (الواتساب والـ RIP)
+    // جلب الإعدادات (واتساب والـ RIP) من الإدارة
     db.ref('settings').on('value', s => { 
         const data = s.val();
         if(data) {
             myWA = data.whatsapp_number || "213661223344";
-            document.getElementById('rip-display').innerText = data.rip_account || "غير متوفر"; 
+            document.getElementById('rip-display').innerText = data.rip_account || "00799999002136612233"; 
         }
     });
 
@@ -177,8 +177,7 @@
     function sendWhatsAppAuth() {
         const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
         if(!n || !p || total === 0) return alert("أكمل البيانات!");
-        // استخدام رقم الواتساب المجلوب من الإدارة
-        window.open(`https://wa.me/${myWA}?text=${encodeURIComponent('طلب جديد: ' + n + '\nكود: ' + authCode)}`, '_blank');
+        window.open(`https://wa.me/${myWA}?text=${encodeURIComponent('طلب جديد من: ' + n + '\nكود التحقق: ' + authCode)}`, '_blank');
         document.getElementById('whatsapp-container').innerHTML = `<button class="order-btn" style="width:100%; background:var(--green); color:#000;" onclick="processOrder('كاش موثق', '${authCode}')">إتمام الطلب النهائي 🚀</button>`;
     }
 
@@ -195,30 +194,46 @@
         const m = document.getElementById('pay-method').value;
         if(!n || !p || total === 0) return alert("أكمل البيانات!");
         if(m === "بريدي موب" && !base64Img) return alert("يرجى رفع صورة وصل التحويل أولاً!");
-        processOrder('بريدي موب', 'Paid-Electronic');
+        processOrder('بريدي موب', 'BaridiMob-Paid');
     }
 
     function processOrder(m, code) {
         const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
+        
+        // محاولة الحصول على الموقع وإرسال الطلب في كل الحالات لضمان وصوله للإدارة
         navigator.geolocation.getCurrentPosition(pos => {
             const gps = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-            const orderData = { 
-                customer: n, 
-                phone: p, 
-                method: m, 
-                authCode: code, 
-                total: total, 
-                location: gps, 
-                items: cart, 
-                receipt: base64Img, 
-                time: new Date().toLocaleString() 
-            };
-            db.ref('orders/' + Date.now()).set(orderData).then(() => { alert("تم الطلب بنجاح! ✅"); location.reload(); });
-        }, () => alert("يجب تفعيل GPS لتحديد موقع التوصيل"));
+            sendToFirebase(n, p, m, code, gps);
+        }, () => {
+            // في حال رفض الزبون الموقع، نرسل الطلب بدون موقع لكي لا يضيع
+            sendToFirebase(n, p, m, code, "الموقع غير مفعل");
+        });
+    }
+
+    function sendToFirebase(n, p, m, code, gps) {
+        const orderData = { 
+            customer: n, 
+            phone: p, 
+            method: m, 
+            authCode: code, 
+            total: total, 
+            location: gps, 
+            items: cart, 
+            receipt: base64Img, 
+            time: new Date().toLocaleString() 
+        };
+        
+        // إرسال الطلب إلى مسار orders الذي تقرأ منه لوحة الإدارة
+        db.ref('orders').push(orderData).then(() => { 
+            alert("تم إرسال طلبك للإدارة بنجاح! ✅"); 
+            location.reload(); 
+        }).catch(err => {
+            alert("حدث خطأ في الاتصال، حاول مجدداً");
+        });
     }
 
     function openModal(id) { document.getElementById(id).style.display='flex'; if(id==='order-modal') toggleVerifySection(); }
     function closeModals() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
 </script>
 </body>
-                </html>
+</html>
