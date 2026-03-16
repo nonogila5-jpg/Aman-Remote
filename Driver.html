@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pizaza Salsabil Driver Pro - 🍕🚀</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --main: #ff6d00; --dark: #050505; --card: #121212; --messenger: #0084ff; --green: #2ecc71; --red: #ff4757; --gold: #ffd700; }
+        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 0; direction: rtl; overflow-x: hidden; background-image: radial-gradient(#1a1a1a 1px, transparent 1px); background-size: 20px 20px; }
+
+        .rainbow-text {
+            font-weight: 900; background: linear-gradient(to right, #ff2400, #e8b21d, #1de840, #1ddde8, #2b1de8, #dd00f3);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 400%;
+            animation: rainbow 8s linear infinite;
+        }
+        @keyframes rainbow { 0% { background-position: 0%; } 100% { background-position: 400%; } }
+
+        #login-section { display: flex; align-items: center; justify-content: center; height: 100vh; background: radial-gradient(circle, #1a1a1a 0%, #000 100%); }
+        .login-box { background: var(--card); padding: 40px 20px; border-radius: 30px; border: 2px solid var(--main); width: 85%; max-width: 380px; text-align: center; box-shadow: 0 0 30px rgba(255,109,0,0.5); }
+        input { width: 100%; padding: 15px; margin: 12px 0; border-radius: 15px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-family: 'Cairo'; font-size: 16px; outline: none; transition: 0.3s; }
+        .btn-login { width: 100%; padding: 16px; border-radius: 15px; border: none; background: var(--main); color: #000; font-weight: 900; cursor: pointer; font-size: 17px; margin-top: 10px; }
+
+        #tasks-section { display: none; padding-bottom: 80px; }
+        header { background: rgba(18, 18, 18, 0.9); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .driver-info { display: flex; align-items: center; gap: 10px; }
+        .status-dot { width: 12px; height: 12px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); }
+
+        .stats-bar { display: flex; justify-content: space-around; padding: 20px 10px; background: #0a0a0a; margin: 10px; border-radius: 20px; border: 1px solid #222; }
+        .stat-item { text-align: center; }
+        .stat-item b { font-size: 20px; color: var(--main); display: block; }
+
+        .order-card { background: var(--card); border-radius: 25px; padding: 20px; margin: 15px; border: 1px solid #333; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .cust-name { font-size: 18px; font-weight: 900; color: #fff; }
+        .order-price { background: rgba(255, 109, 0, 0.1); color: var(--main); padding: 5px 12px; border-radius: 10px; font-weight: bold; }
+        .items-list { background: #000; padding: 10px; border-radius: 12px; margin: 10px 0; font-size: 12px; color: #bbb; border: 1px solid #222; }
+
+        .action-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .btn-call { background: #333; color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 13px; }
+        .btn-gps { background: var(--main); color: #000; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 13px; }
+        .btn-done { width: 100%; margin-top: 10px; background: var(--green); color: #fff; border: none; padding: 14px; border-radius: 15px; font-weight: 900; cursor: pointer; font-family: 'Cairo'; font-size: 16px; }
+
+        .messenger-fab { position: fixed; bottom: 20px; left: 20px; width: 65px; height: 65px; background: var(--messenger); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 30px; z-index: 1000; box-shadow: 0 10px 20px rgba(0,132,255,0.4); }
+        .chat-window { display: none; position: fixed; bottom: 95px; left: 20px; width: 300px; height: 420px; background: var(--card); border: 2px solid var(--messenger); border-radius: 25px; flex-direction: column; z-index: 999; overflow: hidden; }
+        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; background: #000; display: flex; flex-direction: column; }
+        .msg { margin-bottom: 12px; max-width: 80%; padding: 10px; border-radius: 15px; font-size: 13px; color: #fff; }
+        .msg.admin { background: #333; align-self: flex-start; }
+        .msg.me { background: var(--messenger); align-self: flex-end; }
+        .gps-status { font-size: 10px; color: var(--gold); text-align: center; margin-top: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="login-section">
+        <div class="login-box">
+            <h1 class="rainbow-text">PIZAZA SALSABIL</h1>
+            <div style="font-size: 40px; margin: 10px 0;">🍕🚀</div>
+            <p style="color:#888; font-size:12px;">نظام السائقين - التوصيل السريع</p>
+            <input type="text" id="user-input" placeholder="اسم السائق">
+            <input type="password" id="pass-input" placeholder="كلمة السر">
+            <button class="btn-login" onclick="login()">دخول 🛵</button>
+            <p id="error-msg" style="color:var(--red); font-size:12px; display:none; margin-top:15px;"></p>
+        </div>
+    </div>
+
+    <div id="tasks-section">
+        <header>
+            <div class="driver-info">
+                <div class="status-dot"></div>
+                <span id="driver-display" style="font-weight:900;">...</span>
+            </div>
+            <div class="rainbow-text" style="font-size:16px;">Salsabil 🍕🚀</div>
+        </header>
+
+        <div id="gps-status" class="gps-status">جاري تفعيل التتبع المباشر... 📡</div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <b id="order-count">0</b>
+                <span style="font-size:12px; color:#888;">الطلبات النشطة</span>
+            </div>
+            <div class="stat-item">
+                <b style="font-size:14px; color:var(--green)">متصل</b>
+                <span style="font-size:12px; color:#888;">الحالة</span>
+            </div>
+        </div>
+
+        <div id="orders-list"></div>
+
+        <div class="messenger-fab" onclick="toggleChat()">
+            <i class="fab fa-facebook-messenger"></i>
+        </div>
+        <div id="chat-window" class="chat-window">
+            <div style="background:var(--messenger); padding:15px; text-align:center; font-weight:bold;">الدردشة مع الإدارة</div>
+            <div class="chat-messages" id="chat-box"></div>
+            <div style="padding:10px; background:#1a1a1a; display:flex; gap:10px;">
+                <input type="text" id="msg-input" placeholder="اكتب رسالة..." style="margin:0; padding:10px;">
+                <button onclick="sendMsg()" style="background:var(--messenger); border:none; color:white; padding:10px; border-radius:10px; width:50px;"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.database();
+
+    let currentDriverID = null;
+    let lastOrderCount = 0;
+    const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+
+    window.onload = () => {
+        const saved = localStorage.getItem('currentDriver');
+        if(saved) { currentDriverID = localStorage.getItem('driverKey'); showTasks(saved); }
+    };
+
+    function login() {
+        const user = document.getElementById('user-input').value.trim();
+        const pass = document.getElementById('pass-input').value;
+        if(!user || !pass) return;
+        db.ref('drivers_list').once('value', snap => {
+            let found = false;
+            snap.forEach(d => {
+                if(d.val().name === user && d.val().pass === pass) {
+                    found = true; currentDriverID = d.key;
+                    localStorage.setItem('currentDriver', user);
+                    localStorage.setItem('driverKey', d.key);
+                    showTasks(user);
+                }
+            });
+            if(!found) { document.getElementById('error-msg').innerText = "خطأ في البيانات!"; document.getElementById('error-msg').style.display = "block"; }
+        });
+    }
+
+    function showTasks(name) {
+        document.getElementById('login-section').style.display = "none";
+        document.getElementById('tasks-section').style.display = "block";
+        document.getElementById('driver-display').innerText = name;
+        startTracking(name); loadOrders(); loadChat(name);
+    }
+
+    function startTracking(name) {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition(pos => {
+                db.ref('drivers_live/' + currentDriverID).update({
+                    name: name, lat: pos.coords.latitude, lng: pos.coords.longitude, lastSeen: Date.now()
+                });
+                document.getElementById('gps-status').innerText = "موقعك المباشر مفعل الآن ✅";
+            }, null, { enableHighAccuracy: true });
+        }
+    }
+
+    function loadOrders() {
+        db.ref('orders').on('value', snap => {
+            const list = document.getElementById('orders-list');
+            const countDisp = document.getElementById('order-count');
+            const currentCount = snap.numChildren();
+            
+            // تنبيه صوتي عند زيادة الطلبات
+            if (currentCount > lastOrderCount) { notificationSound.play().catch(e => console.log("Sound error")); }
+            lastOrderCount = currentCount;
+            
+            list.innerHTML = "";
+            countDisp.innerText = currentCount;
+
+            if (currentCount === 0) {
+                list.innerHTML = "<p style='text-align:center; color:#555; margin-top:50px;'>لا توجد طلبات حالياً</p>";
+                return;
+            }
+
+            snap.forEach(o => {
+                const data = o.val();
+                let itemsStr = "";
+                for(let key in data.items) { itemsStr += `${data.items[key].name} (x${data.items[key].qty}) | `; }
+
+                list.innerHTML += `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div><div class="cust-name">👤 ${data.customer}</div><div style="font-size:11px; color:#888; margin-top:4px;">🕒 ${data.time || ''}</div></div>
+                            <div class="order-price">${data.total} DZD</div>
+                        </div>
+                        <div class="items-list">🍴 ${itemsStr}</div>
+                        <div class="action-btns">
+                            <a href="tel:${data.phone}" class="btn-call"><i class="fas fa-phone"></i> اتصال</a>
+                            <a href="${data.location}" target="_blank" class="btn-gps"><i class="fas fa-location-arrow"></i> الموقع</a>
+                        </div>
+                        <button onclick="finishOrder('${o.key}')" class="btn-done">تم التوصيل ✅</button>
+                    </div>`;
+            });
+        });
+    }
+
+    function finishOrder(id) { if(confirm("هل أتممت توصيل هذا الطلب؟")) db.ref('orders/' + id).remove(); }
+    function toggleChat() { const win = document.getElementById('chat-window'); win.style.display = (win.style.display === 'flex') ? 'none' : 'flex'; }
+
+    function loadChat(name) {
+        db.ref('delivery_chat').on('value', snap => {
+            const box = document.getElementById('chat-box'); box.innerHTML = "";
+            snap.forEach(c => {
+                const m = c.val();
+                const type = (m.user === "الإدارة") ? "admin" : "me";
+                box.innerHTML += `<div class="msg ${type}"><b>${m.user}:</b><br>${m.text}</div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    function sendMsg() {
+        const txt = document.getElementById('msg-input').value;
+        if(txt) { db.ref('delivery_chat').push({ user: localStorage.getItem('currentDriver'), text: txt }); document.getElementById('msg-input').value = ""; }
+    }
+</script>
+</body>
+</html>

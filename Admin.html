@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة Aman Electronics - Pizaza Salsabil</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #2ecc71; --red: #e74c3c; --messenger: #0084ff; --gold: #ffd700; }
+        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 15px; direction: rtl; }
+        
+        #login-overlay { position: fixed; inset: 0; background: var(--dark); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); width: 100%; max-width: 350px; text-align: center; }
+
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .settings-gear { font-size: 28px; cursor: pointer; color: var(--gold); }
+        
+        #admin-panel { display: none; background: var(--card); border-radius: 20px; border: 1px solid #333; padding: 15px; margin-bottom: 20px; }
+        .tabs-menu { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; scrollbar-width: none; }
+        .tab-link { background: #222; padding: 8px 15px; border-radius: 10px; white-space: nowrap; cursor: pointer; font-size: 12px; border: 1px solid transparent; color: #fff; }
+        .tab-link.active { border-color: var(--gold); color: var(--gold); background: #000; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-family: 'Cairo'; }
+        button { width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; margin-top: 5px; }
+        
+        .order-box { background: #1e1e1e; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #444; position: relative; }
+        .pay-badge { position: absolute; top: 10px; left: 10px; font-size: 20px; }
+        .btn-group { display: flex; gap: 5px; margin-top: 10px; }
+        .btn-action { flex: 1; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 11px; font-weight: bold; color: #000; display: flex; align-items: center; justify-content: center; border: none; }
+        
+        .receipt-preview { width: 100%; height: 150px; object-fit: contain; background: #000; border-radius: 10px; margin-top: 10px; border: 1px solid #333; cursor: pointer; }
+        
+        .price-item { background: #222; padding: 10px; margin-top: 8px; border-radius: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; }
+        .price-item img { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; }
+        
+        .driver-card { background: #111; padding: 12px; border-radius: 15px; margin-top: 10px; border: 1px solid #333; display: flex; flex-direction: column; gap: 8px; }
+        .status-dot { height: 10px; width: 10px; background-color: var(--green); border-radius: 50%; display: inline-block; margin-left: 8px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color:var(--gold)">🔐 إدارة Aman Electronics</h2>
+            <input type="password" id="admin-pass-input" placeholder="كلمة المرور">
+            <button onclick="checkAdminPass()" style="background:var(--gold); color:#000;">دخول النظام</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="settings-gear" onclick="toggleAdmin()">⚙️</div>
+        <div style="font-weight: 900; color: var(--main);">PIZZA SALSABIL</div>
+    </header>
+
+    <div id="admin-panel">
+        <div class="tabs-menu">
+            <div class="tab-link active" onclick="openTab(event, 'tab-items')">الأطباق</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-prices')">الأسعار والصور</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-drivers')">تتبع السائقين 🛵</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-archive')">الأرشيف 📁</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-settings')">إعدادات النظام</div>
+        </div>
+
+        <div id="tab-items" class="tab-content active">
+            <input type="text" id="p-name" placeholder="اسم الطبق">
+            <input type="number" id="p-price" placeholder="السعر">
+            <a href="https://imgbb.com/" target="_blank" style="color:var(--gold); font-size:12px; display:block; text-align:center; margin-bottom:5px;">ارفع الصورة هنا ثم انسخ الرابط المباشر 📸</a>
+            <input type="text" id="p-img" placeholder="رابط الصورة المباشر">
+            <select id="p-cat">
+                <option value="بيتزا">🍕 بيتزا</option>
+                <option value="برغر">🍔 برغر</option>
+                <option value="سندوتش">🥪 سندوتش</option>
+                <option value="مملحات">🥐 مملحات</option>
+                <option value="مشروبات">🥤 مشروبات</option>
+            </select>
+            <button onclick="addProduct()" style="background:var(--main); color:white;">إضافة إلى المنيو +</button>
+        </div>
+
+        <div id="tab-prices" class="tab-content">
+            <input type="text" id="menu-search" placeholder="ابحث باسم الطبق..." oninput="searchMenu()">
+            <div id="search-results"></div>
+        </div>
+
+        <div id="tab-drivers" class="tab-content">
+            <h4 style="color:var(--gold)">🛵 تتبع السائقين المتصلين حالياً</h4>
+            <div id="live-drivers"></div>
+            <button onclick="clearLiveDrivers()" style="background:none; border:1px solid var(--red); color:var(--red); font-size:11px; margin-top:5px;">مسح جميع المتصلين 🗑️</button>
+            <hr style="border:0.5px solid #333; margin:20px 0;">
+            <h4 style="color:var(--gold)">👤 تسجيل سائق جديد</h4>
+            <input type="text" id="driver-name-new" placeholder="اسم السائق">
+            <input type="password" id="driver-pass-new" placeholder="كلمة السر">
+            <button onclick="addDriver()" style="background:var(--messenger); color:#fff;">تسجيل السائق</button>
+            <h4 style="color:var(--gold); margin-top:20px;">📋 القائمة المسجلة</h4>
+            <div id="registered-drivers-list"></div>
+        </div>
+
+        <div id="tab-archive" class="tab-content">
+            <h4 style="color:var(--gold)">📁 أرشيف الطلبات المحذوفة</h4>
+            <div id="archive-display"></div>
+            <button onclick="clearFullArchive()" style="background:var(--red); color:#fff; margin-top:10px;">مسح الأرشيف نهائياً ⚠️</button>
+        </div>
+
+        <div id="tab-settings" class="tab-content">
+            <h4 style="color:var(--gold)">⚙️ الإعدادات العامة</h4>
+            <input type="text" id="admin-whatsapp" placeholder="رقم واتساب الاستلام">
+            <input type="text" id="new-rip" placeholder="رقم RIP بريدي موب">
+            <hr style="border:0.5px solid #333; margin:15px 0;">
+            <h4 style="color:var(--red)">🔐 أمان الإدارة</h4>
+            <input type="text" id="admin-new-pass" placeholder="تغيير كلمة سر الدخول">
+            <button onclick="saveAdminSettings()" style="background:var(--green); color:#000;">حفظ كل التغييرات 💾</button>
+        </div>
+    </div>
+
+    <h4 style="padding: 0 10px; color: var(--gold);">📦 الطلبات الواردة :</h4>
+    <div id="orders-display" style="padding:10px;"></div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    const db = firebase.database();
+
+    let dbPass = "1234";
+    db.ref('settings/admin_auth/pass').on('value', s => { if(s.exists()) dbPass = s.val(); });
+    function checkAdminPass() {
+        if(document.getElementById('admin-pass-input').value === dbPass.toString()) {
+            document.getElementById('login-overlay').style.display = 'none';
+        } else { alert("كلمة المرور خاطئة!"); }
+    }
+
+    function toggleAdmin() { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display==='block')?'none':'block'; }
+    function openTab(evt, t) {
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        document.querySelectorAll(".tab-link").forEach(l => l.classList.remove("active"));
+        document.getElementById(t).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+
+    let menuData = {};
+    db.ref('menu').on('value', s => { menuData = s.val() || {}; searchMenu(); });
+    function searchMenu() {
+        const q = document.getElementById('menu-search').value.toLowerCase();
+        const res = document.getElementById('search-results'); res.innerHTML = "";
+        for (let id in menuData) {
+            if (menuData[id].name.toLowerCase().includes(q)) {
+                res.innerHTML += `<div class="price-item"><img src="${menuData[id].img}"><div style="flex:1;"><b>${menuData[id].name}</b></div><input type="number" id="inp-${id}" value="${menuData[id].price}"><button onclick="updatePrice('${id}')" style="background:var(--green); width:auto; padding:5px 10px;">تحديث</button></div>`;
+            }
+        }
+    }
+    function updatePrice(id) { db.ref('menu/' + id).update({ price: parseInt(document.getElementById('inp-'+id).value) }).then(() => alert("✅")); }
+    function addProduct() {
+        const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, img = document.getElementById('p-img').value, c = document.getElementById('p-cat').value;
+        if(n && p) { db.ref('menu').push({name:n, price:parseInt(p), img:img, category:c}).then(()=> { alert("✅"); }); }
+    }
+
+    function addDriver() {
+        const n = document.getElementById('driver-name-new').value, p = document.getElementById('driver-pass-new').value;
+        if(n && p) db.ref('drivers_list').push({name:n, pass:p}).then(()=>alert("تم التسجيل ✅"));
+    }
+    function clearLiveDrivers() { if(confirm("مسح قائمة المتصلين؟")) db.ref('drivers_live').remove(); }
+    function removeDriverFromList(id) { if(confirm("حذف نهائي؟")) db.ref('drivers_list/' + id).remove(); }
+
+    db.ref('drivers_live').on('value', s => {
+        const div = document.getElementById('live-drivers'); div.innerHTML = "";
+        if(!s.exists()) div.innerHTML = "<p style='color:#666; font-size:12px;'>لا يوجد سائقون متصلون حالياً</p>";
+        s.forEach(d => {
+            const v = d.val();
+            const googleMapsLink = v.lat && v.lng ? `https://www.google.com/maps?q=${v.lat},${v.lng}` : v.location;
+            div.innerHTML += `<div class="driver-card" style="padding:15px; background:#1a1a1a; border:1px solid var(--messenger);"><div><span class="status-dot"></span> <b>${v.name}</b></div><a href="${googleMapsLink}" target="_blank" style="background:var(--gold); color:#000; padding:5px 10px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:bold; text-align:center;">تتبع الموقع مباشر 📍</a><button onclick="db.ref('drivers_live/${d.key}').remove()" style="background:none; color:var(--red); border:1px solid var(--red); font-size:10px; padding:2px; margin-top:5px;">إنهاء الجلسة</button></div>`;
+        });
+    });
+
+    db.ref('drivers_list').on('value', s => {
+        const div = document.getElementById('registered-drivers-list'); div.innerHTML = "";
+        s.forEach(d => { div.innerHTML += `<div class="driver-card" style="flex-direction:row; justify-content:space-between; padding:10px;"><span>🆔 ${d.val().name}</span><button onclick="removeDriverFromList('${d.key}')" style="background:var(--red); width:auto; padding:5px 10px;">حذف</button></div>`; });
+    });
+
+    // --- وظيفة نقل الطلب للأرشيف بدلاً من الحذف النهائي ---
+    function moveToArchive(orderId, orderData) {
+        if(confirm("هل تريد نقل هذا الطلب إلى الأرشيف؟")) {
+            db.ref('archive').push(orderData).then(() => {
+                db.ref('orders/' + orderId).remove();
+            });
+        }
+    }
+
+    db.ref('orders').on('value', s => {
+        const d = document.getElementById('orders-display'); d.innerHTML = "";
+        s.forEach(o => {
+            const v = o.val();
+            const isBaridi = (v.method === "بريدي موب");
+            const icon = isBaridi ? "💳" : "💵";
+            
+            let itemsHtml = "";
+            for(let key in v.items) { itemsHtml += `<small>${v.items[key].name} (x${v.items[key].qty}) </small>`; }
+
+            d.innerHTML += `
+                <div class="order-box">
+                    <span class="pay-badge">${icon}</span>
+                    <div style="display:flex; justify-content:space-between; margin-right:30px;">
+                        <b>👤 ${v.customer}</b>
+                        <b style="color:var(--gold);">${v.total} DZD</b>
+                    </div>
+                    <p style="font-size:12px; margin:5px 0;">📱 ${v.phone} | <span style="color:#888;">${v.time || ''}</span></p>
+                    <div style="background:#000; padding:5px; border-radius:5px; margin:5px 0;">${itemsHtml}</div>
+                    
+                    ${isBaridi && v.receipt ? `
+                        <p style="color:var(--gold); font-size:11px; margin:5px 0;">📸 وصل بريدي موب:</p>
+                        <img src="${v.receipt}" class="receipt-preview" onclick="window.open(this.src)">
+                    ` : ""}
+
+                    <div class="btn-group">
+                        <a href="tel:${v.phone}" class="btn-action" style="background:var(--green)">اتصال 📞</a>
+                        <a href="${v.location}" target="_blank" class="btn-action" style="background:#fff">الموقع 📍</a>
+                        <button onclick='moveToArchive("${o.key}", ${JSON.stringify(v)})' class="btn-action" style="background:var(--red); color:#fff">حذف 🗑️</button>
+                    </div>
+                </div>`;
+        });
+    });
+
+    // --- عرض الأرشيف ---
+    db.ref('archive').on('value', s => {
+        const d = document.getElementById('archive-display'); d.innerHTML = "";
+        if(!s.exists()) d.innerHTML = "<p style='color:#666; font-size:12px; text-align:center;'>الأرشيف فارغ</p>";
+        s.forEach(o => {
+            const v = o.val();
+            d.innerHTML += `
+                <div class="order-box" style="opacity:0.7; border-color:#222;">
+                    <div style="display:flex; justify-content:space-between;"><b>👤 ${v.customer}</b><b>${v.total} DZD</b></div>
+                    <p style="font-size:10px; color:#888;">${v.time || ''} | ${v.phone}</p>
+                    <button onclick="db.ref('archive/${o.key}').remove()" style="background:none; color:var(--red); font-size:10px; border:1px solid var(--red); width:auto; padding:2px 10px;">حذف نهائي</button>
+                </div>`;
+        });
+    });
+
+    function clearFullArchive() { if(confirm("هل أنت متأكد من مسح الأرشيف بالكامل؟ لا يمكن التراجع!")) db.ref('archive').remove(); }
+
+    function saveAdminSettings() {
+        const wa = document.getElementById('admin-whatsapp').value;
+        const rip = document.getElementById('new-rip').value;
+        const newPass = document.getElementById('admin-new-pass').value;
+        if(wa) db.ref('settings/whatsapp_number').set(wa);
+        if(rip) db.ref('settings/rip_account').set(rip);
+        if(newPass) db.ref('settings/admin_auth/pass').set(newPass);
+        alert("تم الحفظ بنجاح ✅");
+    }
+</script>
+</body>
+</html>
