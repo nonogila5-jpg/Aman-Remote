@@ -28,7 +28,6 @@
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-family: 'Cairo'; box-sizing: border-box; }
         .whatsapp-verify-btn { background: #25d366; color: white; padding: 12px; border-radius: 10px; border: none; width: 100%; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
         
-        /* تصميم قسم بريدي موب الجديد */
         .rip-box { background: #1e1e1e; padding: 15px; border-radius: 15px; border: 1px dashed var(--gold); margin: 10px 0; }
         .rip-number { color: var(--gold); font-weight: 900; font-size: 18px; letter-spacing: 1px; }
         .upload-label { display: block; background: #333; padding: 10px; border-radius: 10px; color: #fff; cursor: pointer; border: 1px solid #444; margin-top: 10px; font-size: 14px; }
@@ -77,7 +76,7 @@
             <div id="baridimob-section" style="display: none; text-align: center;">
                 <div class="rip-box">
                     <small style="color: #888;">قم بالتحويل إلى رقم الـ RIP التالي:</small><br>
-                    <span class="rip-number" id="rip-display">00799999000000000000</span>
+                    <span class="rip-number" id="rip-display">تحميل...</span>
                 </div>
                 <label class="upload-label">
                     📸 ارفع صورة وصل التحويل
@@ -102,11 +101,13 @@
 
     let cart = {}; let total = 0; let authCode = ""; let myWA = ""; let base64Img = "";
 
-    // جلب الإعدادات (واتساب والـ RIP)
+    // جلب الإعدادات المحدثة من الإدارة (الواتساب والـ RIP)
     db.ref('settings').on('value', s => { 
         const data = s.val();
-        myWA = data?.whatsapp_number || "213661223344";
-        document.getElementById('rip-display').innerText = data?.rip_number || "00799999002136612233"; 
+        if(data) {
+            myWA = data.whatsapp_number || "213661223344";
+            document.getElementById('rip-display').innerText = data.rip_account || "غير متوفر"; 
+        }
     });
 
     db.ref('menu').on('value', snap => {
@@ -176,6 +177,7 @@
     function sendWhatsAppAuth() {
         const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
         if(!n || !p || total === 0) return alert("أكمل البيانات!");
+        // استخدام رقم الواتساب المجلوب من الإدارة
         window.open(`https://wa.me/${myWA}?text=${encodeURIComponent('طلب جديد: ' + n + '\nكود: ' + authCode)}`, '_blank');
         document.getElementById('whatsapp-container').innerHTML = `<button class="order-btn" style="width:100%; background:var(--green); color:#000;" onclick="processOrder('كاش موثق', '${authCode}')">إتمام الطلب النهائي 🚀</button>`;
     }
@@ -199,7 +201,7 @@
     function processOrder(m, code) {
         const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
         navigator.geolocation.getCurrentPosition(pos => {
-            const gps = `http://maps.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+            const gps = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
             const orderData = { 
                 customer: n, 
                 phone: p, 
@@ -208,7 +210,7 @@
                 total: total, 
                 location: gps, 
                 items: cart, 
-                receipt: base64Img, // تخزين صورة الوصل
+                receipt: base64Img, 
                 time: new Date().toLocaleString() 
             };
             db.ref('orders/' + Date.now()).set(orderData).then(() => { alert("تم الطلب بنجاح! ✅"); location.reload(); });
@@ -219,4 +221,4 @@
     function closeModals() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
 </script>
 </body>
-</html>
+                </html>
