@@ -13,37 +13,29 @@
         .rainbow-text { font-weight: 900; font-size: 24px; background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 400% 400%; animation: rainbow-animation 5s ease infinite; }
         @keyframes rainbow-animation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         .ad-glow { margin: 15px; padding: 20px; background: linear-gradient(45deg, #1a1a1a, #262626); border-radius: 25px; text-align: center; border: 2px solid var(--main); box-shadow: 0 0 15px var(--main); }
-        .ad-pizza-img { width: 80px; height: 80px; object-fit: contain; animation: rotate-pizza 15s linear infinite; }
-        @keyframes rotate-pizza { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .cat-title { margin: 25px 15px 10px; color: var(--main); font-weight: 900; border-right: 5px solid var(--main); padding-right: 12px; font-size: 20px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--card); border-radius: 20px; padding: 10px; position: relative; border: 1px solid #222; text-align: center; }
         .card img { width: 100%; height: 110px; border-radius: 15px; object-fit: cover; }
-        .qty-badge { position: absolute; top: -5px; right: -5px; background: var(--green); color: #000; width: 26px; height: 26px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; border: 2px solid var(--dark); }
+        .qty-badge { position: absolute; top: -5px; right: -5px; background: var(--green); color: #000; width: 26px; height: 26px; border-radius: 50%; display: none; align-items: center; justify-content: center; font-weight: 900; border: 2px solid var(--dark); z-index: 10; }
         .footer-cart { position: fixed; bottom: 0; width: 100%; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333; z-index: 1000; }
         .total-price-text { color: var(--main); font-size: 22px; font-weight: 900; }
         .order-btn { background: var(--main); border: none; padding: 12px 25px; border-radius: 12px; color: #fff; font-weight: 900; font-family: 'Cairo'; cursor: pointer; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: #121212; padding: 20px; border-radius: 25px; width: 100%; border: 1px solid var(--main); max-width: 400px; max-height: 80vh; overflow-y: auto; }
         input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-family: 'Cairo'; box-sizing: border-box; }
-        .whatsapp-verify-btn { background: #25d366; color: white; padding: 12px; border-radius: 10px; border: none; width: 100%; font-weight: bold; cursor: pointer; font-family: 'Cairo'; }
-        
-        .rip-box { background: #1e1e1e; padding: 15px; border-radius: 15px; border: 1px dashed var(--gold); margin: 10px 0; }
-        .rip-number { color: var(--gold); font-weight: 900; font-size: 18px; letter-spacing: 1px; }
-        .upload-label { display: block; background: #333; padding: 10px; border-radius: 10px; color: #fff; cursor: pointer; border: 1px solid #444; margin-top: 10px; font-size: 14px; }
+        .gps-lock { color: var(--red); font-size: 12px; display: block; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: var(--card);">
+    <header style="padding: 15px 20px; display: flex; justify-content: center; align-items: center; background: var(--card);">
         <span class="rainbow-text">PIZAZA SALSABIL</span>
-        <button onclick="openModal('comp-modal')" style="background: none; border: 1px solid var(--red); color: var(--red); border-radius: 8px; padding: 4px 10px; font-family: 'Cairo'; font-size: 12px;">⚠️ شكوى</button>
     </header>
 
     <div class="ad-glow">
-        <img src="https://cdn-icons-png.flaticon.com/512/3595/3595455.png" class="ad-pizza-img">
         <h2 style="margin: 8px 0 2px; color: var(--gold); font-size: 18px;">Salsabil Pizza 🚀</h2>
-        <p style="margin: 0; font-size: 13px; color: #bbb;">أفضل مذاق للبيتزا في وادي سلي</p>
+        <p style="margin: 0; font-size: 13px; color: #bbb;">أفضل مذاق في وادي سلي</p>
     </div>
 
     <div id="categories-wrapper"></div>
@@ -53,43 +45,17 @@
         <button class="order-btn" onclick="openModal('order-modal')">طلب الآن 🚀</button>
     </div>
 
-    <div id="comp-modal" class="modal">
-        <div class="modal-content">
-            <h3 style="text-align: center; color: var(--red);">تقديم شكوى مجانية ⚠️</h3>
-            <input type="text" id="comp-name" placeholder="الاسم">
-            <textarea id="comp-text" placeholder="اكتب شكواك هنا..." rows="4"></textarea>
-            <button class="order-btn" style="width:100%; background:var(--red);" onclick="sendComplaint()">إرسال الشكوى</button>
-            <button onclick="closeModals()" style="width: 100%; background: none; border: none; color: #666; margin-top: 10px;">إلغاء</button>
-        </div>
-    </div>
-
     <div id="order-modal" class="modal">
         <div class="modal-content">
             <h3 style="text-align: center; color: var(--main);">معلومات التوصيل 🚚</h3>
             <input type="text" id="cust-name" placeholder="الاسم الكامل">
             <input type="tel" id="cust-phone" placeholder="رقم الهاتف">
-            <select id="pay-method" onchange="toggleVerifySection()">
+            <select id="pay-method">
                 <option value="كاش">دفع نقداً (كاش 💵)</option>
                 <option value="بريدي موب">بريدي موب (BaridiMob 💳)</option>
             </select>
-
-            <div id="baridimob-section" style="display: none; text-align: center;">
-                <div class="rip-box">
-                    <small style="color: #888;">قم بالتحويل إلى رقم الـ RIP التالي:</small><br>
-                    <span class="rip-number" id="rip-display">تحميل...</span>
-                </div>
-                <label class="upload-label">
-                    📸 ارفع صورة وصل التحويل
-                    <input type="file" id="receipt-img" accept="image/*" style="display: none;" onchange="handleImgUpload(this)">
-                </label>
-                <p id="upload-status" style="font-size: 11px; color: var(--green); margin-top: 5px; display: none;">تم تجهيز الصورة ✅</p>
-            </div>
-
-            <div id="verify-section">
-                <div id="whatsapp-container"></div>
-            </div>
-
-            <button id="main-order-btn" class="order-btn" style="width: 100%; display: none;" onclick="validateAndSend()">إرسال الطلب النهائي ✅</button>
+            <span class="gps-lock">⚠️ تنبيه: الموقع (GPS) مطلوب لإتمام الطلب.</span>
+            <button id="main-order-btn" class="order-btn" style="width: 100%; margin-top: 15px;" onclick="processOrder()">تأكيد الطلب بموقعي 📍</button>
             <button onclick="closeModals()" style="width: 100%; background: none; border: none; color: #666; margin-top: 10px;">إلغاء</button>
         </div>
     </div>
@@ -99,17 +65,9 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    let cart = {}; let total = 0; let authCode = ""; let myWA = ""; let base64Img = "";
+    let cart = {}; let total = 0;
 
-    // جلب الإعدادات (واتساب والـ RIP) من الإدارة
-    db.ref('settings').on('value', s => { 
-        const data = s.val();
-        if(data) {
-            myWA = data.whatsapp_number || "213661223344";
-            document.getElementById('rip-display').innerText = data.rip_account || "00799999002136612233"; 
-        }
-    });
-
+    // جلب المنيو من الإدارة
     db.ref('menu').on('value', snap => {
         const data = snap.val(); const wrapper = document.getElementById('categories-wrapper');
         wrapper.innerHTML = ""; if(!data) return;
@@ -121,12 +79,12 @@
             wrapper.appendChild(section);
             cats[catName].forEach(item => {
                 document.getElementById(`grid-${catName}`).innerHTML += `
-                    <div class="card" id="card-${item.id}">
+                    <div class="card">
                         <div class="qty-badge" id="badge-${item.id}">0</div>
                         <img src="${item.img || ''}">
                         <h4>${item.name}</h4>
                         <div style="color:var(--gold);">${item.price} DZD</div>
-                        <button class="order-btn" style="width:100%;" onclick="updateQty('${item.id}', 1, ${item.price}, '${item.name}')">إضافة +</button>
+                        <button class="order-btn" style="width:100%; margin-top:10px;" onclick="updateQty('${item.id}', 1, ${item.price}, '${item.name}')">إضافة +</button>
                     </div>`;
             });
         }
@@ -141,99 +99,44 @@
         if(cart[id]) { badge.innerText = cart[id].qty; badge.style.display = 'flex'; } else { badge.style.display = 'none'; }
     }
 
-    function toggleVerifySection() {
-        const m = document.getElementById('pay-method').value;
-        const vSec = document.getElementById('verify-section');
-        const bSec = document.getElementById('baridimob-section');
-        const mBtn = document.getElementById('main-order-btn');
-        
-        if(m === "كاش") {
-            vSec.style.display = "block";
-            bSec.style.display = "none";
-            mBtn.style.display = "none";
-            updateWhatsAppButton();
-        } else {
-            vSec.style.display = "none";
-            bSec.style.display = "block";
-            mBtn.style.display = "block";
-        }
+    function processOrder() {
+        const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value, m = document.getElementById('pay-method').value;
+        if(!n || !p || total === 0) return alert("أكمل البيانات والطلب!");
+
+        const btn = document.getElementById('main-order-btn');
+        btn.disabled = true;
+        btn.innerText = "جاري تحديد موقعك... 📍";
+
+        // طلب الموقع بدقة عالية ومنع الإرسال بدونه
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const gpsLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                const orderData = { 
+                    customer: n, 
+                    phone: p, 
+                    method: m, 
+                    total: total, 
+                    location: gpsLink, 
+                    items: cart, 
+                    time: new Date().toLocaleString() 
+                };
+                
+                db.ref('orders').push(orderData).then(() => { 
+                    alert("تم إرسال طلبك بنجاح ✅"); 
+                    location.reload(); 
+                });
+            }, 
+            err => {
+                alert("❌ فشل الإرسال: يجب السماح بالوصول إلى الموقع (GPS) وتفعيله لإتمام الطلب.");
+                btn.disabled = false;
+                btn.innerText = "تأكيد الطلب بموقعي 📍";
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
     }
 
-    function handleImgUpload(el) {
-        const file = el.files[0];
-        const reader = new FileReader();
-        reader.onloadend = function() {
-            base64Img = reader.result;
-            document.getElementById('upload-status').style.display = "block";
-        }
-        if (file) reader.readAsDataURL(file);
-    }
-
-    function updateWhatsAppButton() {
-        authCode = "ACT-" + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('whatsapp-container').innerHTML = `<button class="whatsapp-verify-btn" onclick="sendWhatsAppAuth()">فتح واتساب للتأكيد 🟢</button>`;
-    }
-
-    function sendWhatsAppAuth() {
-        const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
-        if(!n || !p || total === 0) return alert("أكمل البيانات!");
-        window.open(`https://wa.me/${myWA}?text=${encodeURIComponent('طلب جديد من: ' + n + '\nكود التحقق: ' + authCode)}`, '_blank');
-        document.getElementById('whatsapp-container').innerHTML = `<button class="order-btn" style="width:100%; background:var(--green); color:#000;" onclick="processOrder('كاش موثق', '${authCode}')">إتمام الطلب النهائي 🚀</button>`;
-    }
-
-    function sendComplaint() {
-        const name = document.getElementById('comp-name').value, text = document.getElementById('comp-text').value;
-        if(!name || !text) return alert("يرجى ملء كافة الخانات");
-        db.ref('complaints/' + Date.now()).set({ name, text, time: new Date().toLocaleString() }).then(() => {
-            alert("تم إرسال شكواك بنجاح ✅"); closeModals();
-        });
-    }
-
-    function validateAndSend() {
-        const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
-        const m = document.getElementById('pay-method').value;
-        if(!n || !p || total === 0) return alert("أكمل البيانات!");
-        if(m === "بريدي موب" && !base64Img) return alert("يرجى رفع صورة وصل التحويل أولاً!");
-        processOrder('بريدي موب', 'BaridiMob-Paid');
-    }
-
-    function processOrder(m, code) {
-        const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value;
-        
-        // محاولة الحصول على الموقع وإرسال الطلب في كل الحالات لضمان وصوله للإدارة
-        navigator.geolocation.getCurrentPosition(pos => {
-            const gps = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-            sendToFirebase(n, p, m, code, gps);
-        }, () => {
-            // في حال رفض الزبون الموقع، نرسل الطلب بدون موقع لكي لا يضيع
-            sendToFirebase(n, p, m, code, "الموقع غير مفعل");
-        });
-    }
-
-    function sendToFirebase(n, p, m, code, gps) {
-        const orderData = { 
-            customer: n, 
-            phone: p, 
-            method: m, 
-            authCode: code, 
-            total: total, 
-            location: gps, 
-            items: cart, 
-            receipt: base64Img, 
-            time: new Date().toLocaleString() 
-        };
-        
-        // إرسال الطلب إلى مسار orders الذي تقرأ منه لوحة الإدارة
-        db.ref('orders').push(orderData).then(() => { 
-            alert("تم إرسال طلبك للإدارة بنجاح! ✅"); 
-            location.reload(); 
-        }).catch(err => {
-            alert("حدث خطأ في الاتصال، حاول مجدداً");
-        });
-    }
-
-    function openModal(id) { document.getElementById(id).style.display='flex'; if(id==='order-modal') toggleVerifySection(); }
+    function openModal(id) { document.getElementById(id).style.display='flex'; }
     function closeModals() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
 </script>
 </body>
-</html>
+                </html>
