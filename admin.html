@@ -126,6 +126,16 @@
 
     let dbPass = "1234";
     db.ref('settings/admin_auth/pass').on('value', s => { if(s.exists()) dbPass = s.val(); });
+    
+    // كود إضافي لجلب القيم الحالية وعرضها في الخانات عند فتح الإعدادات
+    db.ref('settings').on('value', s => {
+        if(s.exists()){
+            const data = s.val();
+            if(data.whatsapp_number) document.getElementById('admin-whatsapp').value = data.whatsapp_number;
+            if(data.rip_account) document.getElementById('new-rip').value = data.rip_account;
+        }
+    });
+
     function checkAdminPass() {
         if(document.getElementById('admin-pass-input').value === dbPass.toString()) {
             document.getElementById('login-overlay').style.display = 'none';
@@ -179,7 +189,6 @@
         s.forEach(d => { div.innerHTML += `<div class="driver-card" style="flex-direction:row; justify-content:space-between; padding:10px;"><span>🆔 ${d.val().name}</span><button onclick="removeDriverFromList('${d.key}')" style="background:var(--red); width:auto; padding:5px 10px;">حذف</button></div>`; });
     });
 
-    // --- وظيفة نقل الطلب للأرشيف بدلاً من الحذف النهائي ---
     function moveToArchive(orderId, orderData) {
         if(confirm("هل تريد نقل هذا الطلب إلى الأرشيف؟")) {
             db.ref('archive').push(orderData).then(() => {
@@ -222,7 +231,6 @@
         });
     });
 
-    // --- عرض الأرشيف ---
     db.ref('archive').on('value', s => {
         const d = document.getElementById('archive-display'); d.innerHTML = "";
         if(!s.exists()) d.innerHTML = "<p style='color:#666; font-size:12px; text-align:center;'>الأرشيف فارغ</p>";
@@ -239,15 +247,28 @@
 
     function clearFullArchive() { if(confirm("هل أنت متأكد من مسح الأرشيف بالكامل؟ لا يمكن التراجع!")) db.ref('archive').remove(); }
 
+    // --- الدالة المصلحة لحفظ الإعدادات ---
     function saveAdminSettings() {
-        const wa = document.getElementById('admin-whatsapp').value;
-        const rip = document.getElementById('new-rip').value;
-        const newPass = document.getElementById('admin-new-pass').value;
-        if(wa) db.ref('settings/whatsapp_number').set(wa);
-        if(rip) db.ref('settings/rip_account').set(rip);
-        if(newPass) db.ref('settings/admin_auth/pass').set(newPass);
-        alert("تم الحفظ بنجاح ✅");
+        const wa = document.getElementById('admin-whatsapp').value.trim();
+        const rip = document.getElementById('new-rip').value.trim();
+        const newPass = document.getElementById('admin-new-pass').value.trim();
+        
+        let updates = {};
+        if(wa) updates['whatsapp_number'] = wa;
+        if(rip) updates['rip_account'] = rip;
+        if(newPass) updates['admin_auth/pass'] = newPass;
+
+        if (Object.keys(updates).length > 0) {
+            db.ref('settings').update(updates)
+            .then(() => {
+                alert("تم الحفظ بنجاح ✅");
+                if(newPass) document.getElementById('admin-new-pass').value = ""; // تنظيف خانة كلمة السر بعد الحفظ
+            })
+            .catch(err => alert("خطأ في الحفظ: " + err));
+        } else {
+            alert("يرجى ملء خانة واحدة على الأقل للحفظ");
+        }
     }
 </script>
 </body>
-</html>
+                </html>
