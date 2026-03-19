@@ -3,151 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Salsabil Pizza & Aman Electronics</title>
+    <title>Pizaza Salsabil</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #00ff88; --gold: #ffd700; --red: #ff4444; }
         body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding-bottom: 120px; }
-        
-        /* اللوحة الإشهارية المتحركة */
-        .promo-bar { background: var(--main); color: #000; padding: 10px; font-weight: bold; overflow: hidden; white-space: nowrap; position: relative; }
+        .promo-bar { background: var(--main); color: #000; padding: 10px; font-weight: bold; overflow: hidden; white-space: nowrap; }
         .promo-text { display: inline-block; animation: scroll-left 15s linear infinite; }
         @keyframes scroll-left { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-
-        .cat-title { margin: 25px 15px 10px; color: var(--main); font-weight: 900; border-right: 5px solid var(--main); padding-right: 12px; font-size: 20px; }
+        .cat-title { margin: 20px 15px 10px; color: var(--main); font-weight: 900; border-right: 5px solid var(--main); padding-right: 12px; font-size: 20px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: var(--card); border-radius: 20px; padding: 10px; position: relative; border: 1px solid #222; text-align: center; }
-        .card img { width: 100%; height: 110px; border-radius: 15px; object-fit: cover; }
         
-        /* شارات NEW و PROMO */
+        /* إصلاح حجم الصورة لضمان الظهور */
+        .card img { width: 100%; height: 110px; border-radius: 15px; object-fit: cover; display: block; background: #222; margin-bottom: 8px; }
+        
         .badge { position: absolute; top: 10px; left: 10px; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; z-index: 5; }
         .badge-new { background: var(--green); color: #000; }
         .badge-promo { background: var(--red); color: #fff; }
-
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: rgba(10, 10, 10, 0.95); padding: 15px 20px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333; z-index: 1000; }
+        .footer-cart { position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.95); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333; z-index: 1000; box-sizing: border-box; }
         .order-btn { background: var(--main); border: none; padding: 12px 25px; border-radius: 12px; color: #fff; font-weight: 900; cursor: pointer; }
-        
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #121212; padding: 20px; border-radius: 25px; width: 100%; border: 1px solid var(--main); max-width: 400px; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; }
+        .modal-content { background: #121212; padding: 25px; border-radius: 25px; width: 100%; border: 1px solid var(--main); max-width: 400px; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
-    <div class="promo-bar"><div class="promo-text" id="ads-area">مرحباً بكم في Pizaza Salsabil - أطيب المأكولات وأسرع توصيل!</div></div>
+<div class="promo-bar"><div class="promo-text" id="ads-area">مرحباً بكم في Pizaza Salsabil - أطيب المأكولات!</div></div>
 
-    <header style="padding: 20px; text-align: center; background: var(--card);">
-        <h1 style="margin:0; color:var(--main); font-size: 24px;">PIZAZA SALSABIL 🍕</h1>
-    </header>
+<div id="categories-wrapper"></div>
 
-    <div id="categories-wrapper"></div>
+<div class="footer-cart">
+    <div><small>الإجمالي</small><br><span style="color:var(--main); font-size:22px; font-weight:900;" id="total-val">0</span> DZD</div>
+    <button class="order-btn" onclick="openModal('order-modal')">إرسال الطلب 🚀</button>
+</div>
 
-    <div class="footer-cart">
-        <div><small>الإجمالي</small><br><span style="color:var(--main); font-size:22px; font-weight:900;" id="total-val">0</span> DZD</div>
-        <button class="order-btn" onclick="openModal('order-modal')">إتمام الطلب 🚀</button>
+<div id="order-modal" class="modal">
+    <div class="modal-content">
+        <h3>بيانات التوصيل 🚚</h3>
+        <input type="text" id="cust-name" placeholder="الاسم الكامل">
+        <input type="tel" id="cust-phone" placeholder="رقم الهاتف">
+        <select id="pay-method">
+            <option value="كاش">دفع نقداً (كاش)</option>
+            <option value="بريدي موب">بريدي موب</option>
+        </select>
+        <button id="main-btn" class="order-btn" style="width: 100%; margin-top: 10px;" onclick="processOrder()">تفعيل GPS وإرسال الطلب 📍</button>
+        <button onclick="closeModal()" style="background:none; border:none; color:#666; margin-top:10px;">إلغاء</button>
     </div>
+</div>
 
-    <div id="order-modal" class="modal">
-        <div class="modal-content">
-            <h3>تفاصيل التوصيل 🚚</h3>
-            <input type="text" id="cust-name" placeholder="الاسم الكامل">
-            <input type="tel" id="cust-phone" placeholder="رقم الهاتف">
-            <select id="pay-method">
-                <option value="كاش">دفع نقداً (كاش)</option>
-                <option value="بريدي موب">بريدي موب (التحويل البنكي)</option>
-            </select>
-            <p style="color:var(--red); font-size:12px;">* يجب تفعيل الـ GPS لتحديد موقعك بدقة</p>
-            <button id="gps-btn" class="order-btn" style="width: 100%;" onclick="processOrder()">تأكيد الطلب بموقعي 📍</button>
-        </div>
+<div id="rip-modal" class="modal">
+    <div class="modal-content">
+        <h2 style="color:var(--green)">تم تسجيل طلبك! ✅</h2>
+        <p>يرجى تحويل المبلغ لـ (RIP):</p>
+        <div style="background:#000; padding:15px; border-radius:10px; color:var(--gold); font-size:20px; font-weight:900;" id="rip-val">جارِ التحميل...</div>
+        <button class="order-btn" style="background:#25D366; width:100%; margin-top:15px;" onclick="goToWhatsApp()">إرسال وصل التحويل (واتساب) 📸</button>
     </div>
-
-    <div id="rip-modal" class="modal">
-        <div class="modal-content">
-            <h2 style="color:var(--green)">تم إرسال الطلب! ✅</h2>
-            <p>يرجى تحويل المبلغ إلى حسابنا (RIP):</p>
-            <div style="background:#000; padding:15px; border-radius:10px; color:var(--gold); font-size:20px; font-weight:bold;" id="rip-display">00000000000</div>
-            <p style="font-size:13px; color:#bbb; margin-top:10px;">بعد التحويل، اضغط الزر بالأسفل لإرسال صورة الوصل عبر واتساب لتأكيد طلبك:</p>
-            <button class="order-btn" style="background:#25D366; width:100%;" onclick="sendToWhatsapp()">إرسال صورة التحويل (واتساب) 📸</button>
-        </div>
-    </div>
+</div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let cart = {}; let total = 0; let adminSettings = {};
+    let cart = {}; let total = 0; let settings = {};
 
-    // تحميل الإعدادات (RIP واللوحة الإشهارية)
-    db.ref('settings').on('value', s => {
-        adminSettings = s.val() || {};
-        if(adminSettings.promo_text) document.getElementById('ads-area').innerText = adminSettings.promo_text;
-        if(adminSettings.rip_account) document.getElementById('rip-display').innerText = adminSettings.rip_account;
+    db.ref('settings').on('value', s => { 
+        settings = s.val() || {}; 
+        if(settings.promo_text) document.getElementById('ads-area').innerText = settings.promo_text;
+        if(settings.rip_account) document.getElementById('rip-val').innerText = settings.rip_account;
     });
 
-    // تحميل المنيو مقسم حسب الفئات
     db.ref('menu').on('value', snap => {
-        const data = snap.val(); const wrapper = document.getElementById('categories-wrapper');
-        wrapper.innerHTML = ""; if(!data) return;
-        let cats = {"بيتزا": [], "برغر": [], "سندوتش": [], "أخرى": []};
-        for(let id in data) {
-            let c = data[id].category || "أخرى";
-            if(!cats[c]) cats[c] = [];
-            cats[c].push({id, ...data[id]});
+        const data = snap.val(); 
+        const wrapper = document.getElementById('categories-wrapper');
+        wrapper.innerHTML = ""; 
+        if(!data) return;
+
+        let cats = {"بيتزا": [], "برغر": [], "سندوتش": []};
+        for(let id in data) { 
+            let c = data[id].category; 
+            if(cats[c]) cats[c].push({id, ...data[id]}); 
         }
-        for(let catName in cats) {
-            if(cats[catName].length === 0) continue;
-            let section = document.createElement('div');
-            section.innerHTML = `<div class="cat-title">${catName}</div><div class="grid" id="grid-${catName}"></div>`;
-            wrapper.appendChild(section);
-            cats[catName].forEach(item => {
-                let badge = item.status === 'new' ? '<div class="badge badge-new">NEW</div>' : (item.status === 'promo' ? '<div class="badge badge-promo">PROMO</div>' : '');
-                document.getElementById(`grid-${catName}`).innerHTML += `
-                    <div class="card">${badge}<img src="${item.img}"><h4>${item.name}</h4><div style="color:var(--gold)">${item.price} DZD</div>
-                    <button class="order-btn" style="width:100%; margin-top:10px; font-size:12px;" onclick="addToCart('${item.id}', '${item.name}', ${item.price})">إضافة +</button></div>`;
+
+        for(let cName in cats) {
+            if(cats[cName].length === 0) continue;
+            let sectionHTML = `<div class="cat-title">${cName}</div><div class="grid" id="g-${cName}"></div>`;
+            wrapper.innerHTML += sectionHTML;
+
+            cats[cName].forEach(i => {
+                let badge = i.status === 'new' ? '<div class="badge badge-new">NEW</div>' : (i.status === 'promo' ? '<div class="badge badge-promo">PROMO</div>' : '');
+                
+                // هنا الإصلاح: التأكد من وجود رابط الصورة أو وضع صورة افتراضية
+                let imageSrc = (i.img && i.img.trim() !== "") ? i.img : "https://via.placeholder.com/150?text=No+Image";
+
+                document.getElementById(`g-${cName}`).innerHTML += `
+                    <div class="card">
+                        ${badge}
+                        <img src="${imageSrc}" alt="${i.name}">
+                        <h4>${i.name}</h4>
+                        <div style="color:var(--gold)">${i.price} DZD</div>
+                        <button class="order-btn" style="width:100%; margin-top:10px;" onclick="add('${i.id}','${i.name}',${i.price})">إضافة +</button>
+                    </div>`;
             });
         }
     });
 
-    function addToCart(id, name, price) {
-        if(!cart[id]) cart[id] = {name, price, qty:0};
-        cart[id].qty++; total += price;
-        document.getElementById('total-val').innerText = total;
-    }
+    function add(id, n, p) { if(!cart[id]) cart[id]={n,p,q:0}; cart[id].q++; total+=p; document.getElementById('total-val').innerText=total; }
 
     function processOrder() {
         const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value, m = document.getElementById('pay-method').value;
-        if(!n || !p || total === 0) return alert("يرجى إدخال البيانات واختيار الوجبات");
-
-        const btn = document.getElementById('gps-btn');
-        btn.disabled = true; btn.innerText = "جاري تحديد موقعك... 📍";
-
+        if(!n || !p || total === 0) return alert("أكمل البيانات أولاً!");
+        const btn = document.getElementById('main-btn');
+        btn.disabled = true; btn.innerText = "جاري جلب الموقع... 📍";
         navigator.geolocation.getCurrentPosition(pos => {
             const gps = "https://www.google.com/maps?q=" + pos.coords.latitude + "," + pos.coords.longitude;
-            const orderData = { customer: n, phone: p, method: m, total: total, location: gps, items: cart, time: new Date().toLocaleString() };
-            
-            db.ref('orders').push(orderData).then(() => {
-                if(m === "بريدي موب") {
-                    openModal('rip-modal');
-                } else {
-                    alert("تم إرسال طلبك بنجاح! ✅"); location.reload();
-                }
+            const order = { customer: n, phone: p, method: m, total: total, location: gps, items: cart, time: new Date().toLocaleString() };
+            db.ref('orders').push(order).then(() => {
+                if(m === "بريدي موب") openModal('rip-modal'); else { alert("تم الطلب بنجاح!"); location.reload(); }
             });
-        }, () => {
-            alert("فشل تحديد الموقع! يرجى تشغيل الـ GPS للمتابعة.");
-            btn.disabled = false; btn.innerText = "تأكيد الطلب بموقعي 📍";
-        }, { enableHighAccuracy: true });
+        }, () => { alert("يجب تشغيل GPS!"); btn.disabled = false; btn.innerText = "تفعيل GPS وإرسال الطلب 📍"; }, {enableHighAccuracy:true});
     }
 
-    function sendToWhatsapp() {
-        const msg = encodeURIComponent(`مرحباً، لقد أتممت طلباً بقيمة ${total} DZD. سأرسل لكم صورة التحويل الآن.`);
-        window.open(`https://wa.me/${adminSettings.whatsapp_number}?text=${msg}`);
-        location.reload();
-    }
-
+    function goToWhatsApp() { window.open(`https://wa.me/${settings.whatsapp_number}?text=وصل طلب جديد بقيمة ${total} DZD`); location.reload(); }
     function openModal(id) { document.getElementById(id).style.display='flex'; }
+    function closeModal() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
 </script>
 </body>
-</html>
+    </html>
+    
