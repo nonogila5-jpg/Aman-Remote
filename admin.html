@@ -3,112 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة Aman Electronics - Pizaza Salsabil</title>
+    <title>إدارة Aman Electronics</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #2ecc71; --red: #e74c3c; --messenger: #0084ff; --gold: #ffd700; }
+        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #2ecc71; --red: #e74c3c; --gold: #ffd700; --messenger: #0084ff; }
         body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 15px; direction: rtl; }
-        #login-overlay { position: fixed; inset: 0; background: var(--dark); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .login-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); width: 100%; max-width: 350px; text-align: center; }
+        #login-overlay { position: fixed; inset: 0; background: var(--dark); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); width: 300px; text-align: center; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
-        .settings-gear { font-size: 28px; cursor: pointer; color: var(--gold); }
         #admin-panel { display: none; background: var(--card); border-radius: 20px; border: 1px solid #333; padding: 15px; margin-bottom: 20px; }
-        .tabs-menu { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; scrollbar-width: none; }
-        .tab-link { background: #222; padding: 8px 15px; border-radius: 10px; white-space: nowrap; cursor: pointer; font-size: 12px; border: 1px solid transparent; color: #fff; }
+        .tabs-menu { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        .tab-link { background: #222; padding: 8px 15px; border-radius: 10px; white-space: nowrap; cursor: pointer; font-size: 12px; border: 1px solid transparent; }
         .tab-link.active { border-color: var(--gold); color: var(--gold); background: #000; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-family: 'Cairo'; }
-        button { width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; font-family: 'Cairo'; margin-top: 5px; }
-        .order-box { background: #1e1e1e; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #444; position: relative; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .order-box { background: #1e1e1e; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #444; position: relative; }
         .btn-group { display: flex; gap: 5px; margin-top: 10px; }
-        .btn-action { flex: 1; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 11px; font-weight: bold; color: #000; display: flex; align-items: center; justify-content: center; border: none; }
-        .price-item { background: #222; padding: 10px; margin-top: 8px; border-radius: 12px; display: flex; align-items: center; gap: 12px; border: 1px solid #333; }
-        .price-item img { width: 55px; height: 55px; border-radius: 10px; object-fit: cover; }
-        .driver-card { background: #111; padding: 12px; border-radius: 15px; margin-top: 10px; border: 1px solid #333; display: flex; flex-direction: column; gap: 8px; }
+        .btn-action { flex: 1; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 11px; font-weight: bold; color: #000; display: flex; align-items: center; justify-content: center; }
+        .driver-card { background: #111; padding: 12px; border-radius: 15px; margin-top: 10px; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
     <div id="login-overlay">
         <div class="login-box">
-            <h2 style="color:var(--gold)">🔐 إدارة Aman Electronics</h2>
+            <h2 style="color:var(--gold)">🔐 إدارة Aman</h2>
             <input type="password" id="admin-pass-input" placeholder="كلمة المرور">
-            <button onclick="checkAdminPass()" style="background:var(--gold); color:#000;">دخول النظام</button>
+            <button onclick="checkAdminPass()" style="background:var(--gold);">دخول</button>
         </div>
     </div>
 
     <header>
-        <div class="settings-gear" onclick="toggleAdmin()">⚙️</div>
+        <div style="font-size: 28px; cursor: pointer;" onclick="toggleAdmin()">⚙️</div>
         <div style="font-weight: 900; color: var(--main);">PIZZA SALSABIL</div>
     </header>
 
     <div id="admin-panel">
         <div class="tabs-menu">
             <div class="tab-link active" onclick="openTab(event, 'tab-items')">الأطباق</div>
-            <div class="tab-link" onclick="openTab(event, 'tab-prices')">الأسعار والصور</div>
-            <div class="tab-link" onclick="openTab(event, 'tab-drivers')">تتبع السائقين 🛵</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-drivers')">السائقين 🛵</div>
             <div class="tab-link" onclick="openTab(event, 'tab-archive')">الأرشيف 📁</div>
-            <div class="tab-link" onclick="openTab(event, 'tab-settings')">إعدادات النظام</div>
+            <div class="tab-link" onclick="openTab(event, 'tab-settings')">إعدادات</div>
         </div>
 
         <div id="tab-items" class="tab-content active">
             <input type="text" id="p-name" placeholder="اسم الطبق">
             <input type="number" id="p-price" placeholder="السعر">
-            <input type="text" id="p-img" placeholder="رابط الصورة المباشر">
+            <input type="text" id="p-img" placeholder="رابط الصورة">
             <select id="p-cat">
-                <option value="بيتزا">🍕 بيتزا</option>
-                <option value="برغر">🍔 برغر</option>
-                <option value="سندوتش">🥪 سندوتش</option>
-                <option value="مملحات">🥐 مملحات</option>
-                <option value="مشروبات">🥤 مشروبات</option>
+                <option value="بيتزا">🍕 بيتزا</option><option value="برغر">🍔 برغر</option>
+                <option value="سندوتش">🥪 سندوتش</option><option value="مشروبات">🥤 مشروبات</option>
             </select>
-            <button onclick="addProduct()" style="background:var(--main); color:white;">إضافة إلى المنيو +</button>
-        </div>
-
-        <div id="tab-prices" class="tab-content">
-            <input type="text" id="menu-search" placeholder="ابحث باسم الطبق..." oninput="searchMenu()">
-            <div id="search-results"></div>
+            <button onclick="addProduct()" style="background:var(--main); color:white;">إضافة للمنيو +</button>
         </div>
 
         <div id="tab-drivers" class="tab-content">
-            <h4 style="color:var(--gold)">🛵 تتبع السائقين المتصلين</h4>
             <div id="live-drivers"></div>
         </div>
 
         <div id="tab-archive" class="tab-content">
             <div id="archive-display"></div>
-            <button onclick="clearFullArchive()" style="background:var(--red); color:#fff; margin-top:10px;">مسح الأرشيف نهائياً 🗑️</button>
+            <button onclick="if(confirm('مسح الأرشيف؟')) db.ref('archive').remove()" style="background:var(--red); color:white;">تفريغ الأرشيف 🗑️</button>
         </div>
 
         <div id="tab-settings" class="tab-content">
-            <input type="text" id="admin-whatsapp" placeholder="رقم واتساب الاستلام">
-            <input type="text" id="new-rip" placeholder="رقم RIP بريدي موب">
-            <input type="text" id="admin-new-pass" placeholder="تغيير كلمة سر الدخول">
-            <button onclick="saveAdminSettings()" style="background:var(--green); color:#000;">حفظ كل التغييرات 💾</button>
+            <input type="text" id="admin-whatsapp" placeholder="رقم واتساب">
+            <input type="text" id="admin-new-pass" placeholder="تغيير كلمة السر">
+            <button onclick="saveAdminSettings()" style="background:var(--green);">حفظ 💾</button>
         </div>
     </div>
 
-    <h4 style="padding: 0 10px; color: var(--gold);">📦 الطلبات الواردة :</h4>
-    <div id="orders-display" style="padding:10px;"></div>
+    <h4 style="padding: 10px; color: var(--gold);">📦 الطلبات الواردة:</h4>
+    <div id="orders-display" style="padding: 10px;"></div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    let dbPass = "1234";
-    db.ref('settings/admin_auth/pass').on('value', s => { if(s.exists()) dbPass = s.val(); });
-
     function checkAdminPass() {
-        if(document.getElementById('admin-pass-input').value === dbPass.toString()) {
-            document.getElementById('login-overlay').style.display = 'none';
-        } else { alert("كلمة المرور خاطئة!"); }
+        db.ref('settings/admin_auth/pass').once('value', s => {
+            if(document.getElementById('admin-pass-input').value === s.val().toString()) {
+                document.getElementById('login-overlay').style.display = 'none';
+            } else { alert("خطأ!"); }
+        });
     }
 
     function toggleAdmin() { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display==='block')?'none':'block'; }
@@ -119,44 +103,28 @@
         evt.currentTarget.classList.add("active");
     }
 
-    let menuData = {};
-    db.ref('menu').on('value', s => { menuData = s.val() || {}; searchMenu(); });
-    function searchMenu() {
-        const q = document.getElementById('menu-search').value.toLowerCase();
-        const res = document.getElementById('search-results'); res.innerHTML = "";
-        for (let id in menuData) {
-            if (menuData[id].name.toLowerCase().includes(q)) {
-                res.innerHTML += `<div class="price-item"><img src="${menuData[id].img}"><div style="flex:1;"><b>${menuData[id].name}</b></div><input type="number" id="inp-${id}" value="${menuData[id].price}"><button onclick="updatePrice('${id}')" style="background:var(--green); width:auto; padding:5px 10px;">تحديث</button></div>`;
-            }
-        }
-    }
-    function updatePrice(id) { db.ref('menu/' + id).update({ price: parseInt(document.getElementById('inp-'+id).value) }); }
     function addProduct() {
         const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, img = document.getElementById('p-img').value, c = document.getElementById('p-cat').value;
-        if(n && p) { db.ref('menu').push({name:n, price:parseInt(p), img:img, category:c}).then(()=> alert("تم الإضافة ✅")); }
+        if(n && p) db.ref('menu').push({name:n, price:parseInt(p), img:img, category:c}).then(()=>alert("تم الإضافة ✅"));
     }
 
-    // تتبع الطلبات مع صوت تنبيه
     let firstLoad = true;
     db.ref('orders').on('value', s => {
-        if(!firstLoad && s.exists()) { document.getElementById('notif-sound').play(); }
+        if(!firstLoad && s.exists()) { document.getElementById('notif-sound').play().catch(()=>{}); }
         firstLoad = false;
-        
         const d = document.getElementById('orders-display'); d.innerHTML = "";
         s.forEach(o => {
-            const v = o.val();
-            let itemsHtml = "";
-            for(let key in v.items) { itemsHtml += `<small>${v.items[key].name} (x${v.items[key].qty}) </small>`; }
+            const v = o.val(); let items = ""; for(let k in v.items) items += `${v.items[k].name} (x${v.items[k].qty}) `;
             d.innerHTML += `
                 <div class="order-box">
                     <span style="float:left">${v.method === "كاش" ? "💵" : "💳"}</span>
-                    <b>👤 ${v.customer}</b> - <b style="color:var(--gold);">${v.total} DZD</b>
-                    <p style="font-size:12px; margin:5px 0;">📱 ${v.phone} | ${v.time || ''}</p>
-                    <div style="background:#000; padding:5px; border-radius:5px;">${itemsHtml}</div>
+                    <b>👤 ${v.customer}</b> | <b style="color:var(--gold)">${v.total} DZD</b>
+                    <p style="font-size:12px; margin:5px 0;">📱 ${v.phone} | ${v.time}</p>
+                    <div style="background:#000; padding:8px; border-radius:8px; font-size:11px;">${items}</div>
                     <div class="btn-group">
                         <a href="tel:${v.phone}" class="btn-action" style="background:var(--green)">اتصال 📞</a>
                         <a href="${v.location}" target="_blank" class="btn-action" style="background:#fff">الموقع 📍</a>
-                        <button onclick="db.ref('archive').push(${JSON.stringify(v)}).then(()=>db.ref('orders/${o.key}').remove())" class="btn-action" style="background:var(--red); color:#fff">حذف 🗑️</button>
+                        <button onclick="db.ref('archive').push(${JSON.stringify(v)}).then(()=>db.ref('orders/${o.key}').remove())" class="btn-action" style="background:var(--red); color:#fff">أرشفة 🗑️</button>
                     </div>
                 </div>`;
         });
@@ -165,20 +133,22 @@
     db.ref('drivers_live').on('value', s => {
         const div = document.getElementById('live-drivers'); div.innerHTML = "";
         s.forEach(d => {
-            const v = d.val();
-            const link = v.lat ? "https://www.google.com/maps?q=" + v.lat + "," + v.lng : v.location;
-            div.innerHTML += `<div class="driver-card"><div><b>🛵 ${v.name}</b></div><a href="${link}" target="_blank" class="btn-action" style="background:var(--gold); color:#000;">تتبع السائق 📍</a></div>`;
+            const v = d.val(); const link = v.lat ? `https://www.google.com/maps?q=${v.lat},${v.lng}` : v.location;
+            div.innerHTML += `<div class="driver-card"><b>🛵 ${v.name}</b><br><a href="${link}" target="_blank" style="color:var(--gold); font-size:12px;">تتبع الموقع المباشر 📍</a></div>`;
         });
+    });
+
+    db.ref('archive').on('value', s => {
+        const div = document.getElementById('archive-display'); div.innerHTML = "";
+        s.forEach(o => { const v = o.val(); div.innerHTML += `<div class="order-box" style="opacity:0.6; font-size:11px;">${v.customer} - ${v.total} DZD - ${v.time}</div>`; });
     });
 
     function saveAdminSettings() {
         const updates = {};
-        const wa = document.getElementById('admin-whatsapp').value, rip = document.getElementById('new-rip').value, pass = document.getElementById('admin-new-pass').value;
-        if(wa) updates['whatsapp_number'] = wa;
-        if(rip) updates['rip_account'] = rip;
-        if(pass) updates['admin_auth/pass'] = pass;
-        db.ref('settings').update(updates).then(() => alert("تم حفظ الإعدادات 💾"));
+        const wa = document.getElementById('admin-whatsapp').value, pass = document.getElementById('admin-new-pass').value;
+        if(wa) updates['whatsapp_number'] = wa; if(pass) updates['admin_auth/pass'] = pass;
+        db.ref('settings').update(updates).then(() => alert("تم الحفظ ✅"));
     }
 </script>
 </body>
-        </html>
+</html>
