@@ -67,7 +67,6 @@
 
     let cart = {}; let total = 0;
 
-    // جلب المنيو من الإدارة
     db.ref('menu').on('value', snap => {
         const data = snap.val(); const wrapper = document.getElementById('categories-wrapper');
         wrapper.innerHTML = ""; if(!data) return;
@@ -104,32 +103,27 @@
         if(!n || !p || total === 0) return alert("أكمل البيانات والطلب!");
 
         const btn = document.getElementById('main-order-btn');
-        btn.disabled = true;
-        btn.innerText = "جاري تحديد موقعك... 📍";
+        btn.disabled = true; btn.innerText = "جاري تحديد موقعك... 📍";
 
-        // طلب الموقع بدقة عالية ومنع الإرسال بدونه
         navigator.geolocation.getCurrentPosition(
             pos => {
-                const gpsLink = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                const lat = pos.coords.latitude;
+                const lon = pos.coords.longitude;
+                // رابط خرائط جوجل الصحيح بدون أخطاء تنسيق
+                const gpsLink = "https://www.google.com/maps?q=" + lat + "," + lon;
+                
                 const orderData = { 
-                    customer: n, 
-                    phone: p, 
-                    method: m, 
-                    total: total, 
-                    location: gpsLink, 
-                    items: cart, 
-                    time: new Date().toLocaleString() 
+                    customer: n, phone: p, method: m, total: total, location: gpsLink, 
+                    items: cart, time: new Date().toLocaleString() 
                 };
                 
                 db.ref('orders').push(orderData).then(() => { 
-                    alert("تم إرسال طلبك بنجاح ✅"); 
-                    location.reload(); 
+                    alert("تم إرسال طلبك بنجاح ✅"); location.reload(); 
                 });
             }, 
             err => {
-                alert("❌ فشل الإرسال: يجب السماح بالوصول إلى الموقع (GPS) وتفعيله لإتمام الطلب.");
-                btn.disabled = false;
-                btn.innerText = "تأكيد الطلب بموقعي 📍";
+                alert("❌ فشل الإرسال: يجب تفعيل الـ GPS والسماح بالوصول للموقع.");
+                btn.disabled = false; btn.innerText = "تأكيد الطلب بموقعي 📍";
             },
             { enableHighAccuracy: true, timeout: 10000 }
         );
