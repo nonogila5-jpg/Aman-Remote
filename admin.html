@@ -2,73 +2,85 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>التحكم الكامل - Aman Electronics</title>
+    <title>إدارة Aman Electronics</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Cairo'; background: #000; color: #fff; padding: 20px; }
-        .tab { display: none; background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; }
-        .tab.active { display: block; }
-        .nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
-        .nav button { flex: 1; padding: 10px; background: #222; color: #fff; border: none; cursor: pointer; white-space: nowrap; }
+        .box { background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; }
+        .nav button { flex: 1; padding: 12px; background: #222; color: #fff; border: none; cursor: pointer; border-radius: 8px; }
         .nav button.active { background: #ff6d00; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #444; }
-        .order-card { background: #222; border-right: 5px solid #ff6d00; padding: 15px; margin-bottom: 15px; }
+        .tab { display: none; } .tab.active { display: block; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: #fff; border-radius: 8px; }
+        .order-card { background: #1a1a1a; padding: 15px; border-right: 5px solid #ff6d00; margin-bottom: 10px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: #ff6d00; text-align:center;">إدارة Salsabil & Aman ⚙️</h2>
+    <h2 style="text-align:center; color: #ff6d00;">لوحة تحكم Aman ⚙️</h2>
 
     <div class="nav">
-        <button class="active" onclick="showTab('t1', this)">الطلبات</button>
-        <button onclick="showTab('t2', this)">المنيو</button>
-        <button onclick="showTab('t3', this)">السائقين</button>
-        <button onclick="showTab('t4', this)">الإعدادات</button>
+        <button class="active" onclick="switchTab('orders-tab', this)">الطلبات</button>
+        <button onclick="switchTab('menu-tab', this)">المنيو</button>
+        <button onclick="switchTab('drivers-tab', this)">السائقين</button>
+        <button onclick="switchTab('settings-tab', this)">الإعدادات</button>
     </div>
 
-    <div id="t1" class="tab active">
+    <div id="orders-tab" class="tab active">
         <div id="orders-list"></div>
     </div>
 
-    <div id="t2" class="tab">
-        <input type="text" id="p-name" placeholder="الاسم">
-        <input type="number" id="p-price" placeholder="السعر">
-        <input type="text" id="p-img" placeholder="رابط الصورة">
-        <select id="p-cat">
-            <option value="بيتزا">بيتزا</option><option value="برغر">برغر</option><option value="سندوتش">سندوتش</option>
-        </select>
-        <select id="p-status">
-            <option value="normal">عادي</option><option value="new">NEW</option><option value="promo">PROMO</option>
-        </select>
-        <button onclick="addP()" style="width:100%; background:#ff6d00; padding:10px;">إضافة للمنيو</button>
-        <hr>
-        <div id="menu-list"></div>
+    <div id="menu-tab" class="tab">
+        <div class="box">
+            <h3>إضافة طبق جديد</h3>
+            <input type="text" id="p-name" placeholder="الاسم">
+            <input type="number" id="p-price" placeholder="السعر">
+            <input type="text" id="p-img" placeholder="رابط الصورة">
+            <select id="p-cat">
+                <option value="بيتزا">بيتزا</option><option value="برغر">برغر</option><option value="سندوتش">سندوتش</option>
+            </select>
+            <select id="p-status">
+                <option value="normal">عادي</option><option value="new">NEW</option><option value="promo">PROMO</option>
+            </select>
+            <button onclick="addProd()" style="width:100%; background:#ff6d00; border:none; padding:12px; color:#fff; font-weight:bold;">إضافة +</button>
+        </div>
     </div>
 
-    <div id="t3" class="tab">
+    <div id="drivers-tab" class="tab">
         <div id="drivers-list"></div>
     </div>
 
-    <div id="t4" class="tab">
-        <h3>تعديل RIP والواتساب والإعلان</h3>
-        <input type="text" id="set-rip" placeholder="رقم RIP">
-        <input type="text" id="set-wa" placeholder="رقم واتساب">
-        <input type="text" id="set-ads" placeholder="نص الإعلان">
-        <button onclick="saveSet()" style="width:100%; background:#2ecc71; padding:10px;">حفظ الإعدادات 💾</button>
+    <div id="settings-tab" class="tab">
+        <div class="box">
+            <h3>إعدادات RIP والواتساب والإعلان</h3>
+            <input type="text" id="set-rip" placeholder="رقم الـ RIP">
+            <input type="text" id="set-wa" placeholder="رقم واتساب الاستلام">
+            <input type="text" id="set-ads" placeholder="نص الإعلان المتحرك">
+            <button onclick="saveSet()" style="width:100%; background:#2ecc71; border:none; padding:12px; color:#000; font-weight:bold;">حفظ التغييرات ✅</button>
+        </div>
     </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function showTab(id, btn) {
+    function switchTab(id, b) {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        btn.classList.add('active');
+        document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(id).classList.add('active'); b.classList.add('active');
+    }
+
+    function addProd() {
+        db.ref('menu').push({
+            name: document.getElementById('p-name').value,
+            price: parseInt(document.getElementById('p-price').value),
+            img: document.getElementById('p-img').value,
+            category: document.getElementById('p-cat').value,
+            status: document.getElementById('p-status').value
+        }).then(()=>alert("تمت الإضافة"));
     }
 
     function saveSet() {
@@ -76,44 +88,29 @@
             rip_account: document.getElementById('set-rip').value,
             whatsapp_number: document.getElementById('set-wa').value,
             promo_text: document.getElementById('set-ads').value
-        }).then(() => alert("تم الحفظ!"));
+        }).then(()=>alert("تم الحفظ"));
     }
 
-    function addP() {
-        db.ref('menu').push({
-            name: document.getElementById('p-name').value,
-            price: parseInt(document.getElementById('p-price').value),
-            img: document.getElementById('p-img').value,
-            category: document.getElementById('p-cat').value,
-            status: document.getElementById('p-status').value
-        });
-    }
-
-    // عرض الطلبات
     db.ref('orders').on('value', s => {
         const l = document.getElementById('orders-list'); l.innerHTML = "";
         s.forEach(o => {
             const v = o.val();
             l.innerHTML += `<div class="order-card">
-                <b>${v.customer}</b> - ${v.total} DZD<br>
-                📱 ${v.phone} | 💳 ${v.method}<br>
+                <b>${v.customer}</b> | ${v.total} DZD | 💳 ${v.method}<br>📱 ${v.phone}<br>
                 <a href="${v.location}" target="_blank" style="color:cyan">الموقع 📍</a> | 
-                <button onclick="db.ref('archive').push(${JSON.stringify(v)}).then(()=>db.ref('orders/${o.key}').remove())" style="background:red; border:none; color:#fff;">أرشفة ✅</button>
+                <button onclick="db.ref('archive').push(${JSON.stringify(v)}).then(()=>db.ref('orders/${o.key}').remove())" style="background:red; color:white; border:none; padding:5px;">أرشفة ✅</button>
             </div>`;
         });
     });
 
-    // تتبع السائقين
     db.ref('drivers_live').on('value', s => {
         const l = document.getElementById('drivers-list'); l.innerHTML = "";
         s.forEach(d => {
             const v = d.val();
-            l.innerHTML += `<div class="order-card" style="border-color:green">
-                <b>السائق: ${v.name}</b><br>
-                <a href="${v.location}" target="_blank" style="color:green">مكانه الحالي 📍</a>
-            </div>`;
+            l.innerHTML += `<div class="order-card" style="border-color:green"><b>🛵 السائق: ${v.name}</b><br><a href="${v.location}" target="_blank" style="color:green">تتبع الموقع 📍</a></div>`;
         });
     });
 </script>
 </body>
-                                  </html>
+                </html>
+                                                                                          
