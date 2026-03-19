@@ -2,153 +2,118 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة Aman Electronics</title>
+    <title>التحكم الكامل - Aman Electronics</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #2ecc71; --red: #e74c3c; --gold: #ffd700; --messenger: #0084ff; }
-        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding: 15px; direction: rtl; }
-        #login-overlay { position: fixed; inset: 0; background: var(--dark); z-index: 10000; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid var(--gold); width: 300px; text-align: center; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
-        #admin-panel { display: none; background: var(--card); border-radius: 20px; border: 1px solid #333; padding: 15px; margin-bottom: 20px; }
-        .tabs-menu { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #333; margin-bottom: 15px; }
-        .tab-link { background: #222; padding: 8px 15px; border-radius: 10px; white-space: nowrap; cursor: pointer; font-size: 12px; border: 1px solid transparent; }
-        .tab-link.active { border-color: var(--gold); color: var(--gold); background: #000; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .order-box { background: #1e1e1e; padding: 15px; border-radius: 20px; margin-bottom: 15px; border: 1px solid #444; position: relative; }
-        .btn-group { display: flex; gap: 5px; margin-top: 10px; }
-        .btn-action { flex: 1; padding: 10px; border-radius: 8px; text-align: center; text-decoration: none; font-size: 11px; font-weight: bold; color: #000; display: flex; align-items: center; justify-content: center; }
-        .driver-card { background: #111; padding: 12px; border-radius: 15px; margin-top: 10px; border: 1px solid #333; }
+        body { font-family: 'Cairo'; background: #000; color: #fff; padding: 20px; }
+        .tab { display: none; background: #111; padding: 20px; border-radius: 15px; border: 1px solid #333; }
+        .tab.active { display: block; }
+        .nav { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
+        .nav button { flex: 1; padding: 10px; background: #222; color: #fff; border: none; cursor: pointer; white-space: nowrap; }
+        .nav button.active { background: #ff6d00; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #444; }
+        .order-card { background: #222; border-right: 5px solid #ff6d00; padding: 15px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-    <audio id="notif-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <h2 style="color: #ff6d00; text-align:center;">إدارة Salsabil & Aman ⚙️</h2>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <h2 style="color:var(--gold)">🔐 إدارة Aman</h2>
-            <input type="password" id="admin-pass-input" placeholder="كلمة المرور">
-            <button onclick="checkAdminPass()" style="background:var(--gold);">دخول</button>
-        </div>
+    <div class="nav">
+        <button class="active" onclick="showTab('t1', this)">الطلبات</button>
+        <button onclick="showTab('t2', this)">المنيو</button>
+        <button onclick="showTab('t3', this)">السائقين</button>
+        <button onclick="showTab('t4', this)">الإعدادات</button>
     </div>
 
-    <header>
-        <div style="font-size: 28px; cursor: pointer;" onclick="toggleAdmin()">⚙️</div>
-        <div style="font-weight: 900; color: var(--main);">PIZZA SALSABIL</div>
-    </header>
-
-    <div id="admin-panel">
-        <div class="tabs-menu">
-            <div class="tab-link active" onclick="openTab(event, 'tab-items')">الأطباق</div>
-            <div class="tab-link" onclick="openTab(event, 'tab-drivers')">السائقين 🛵</div>
-            <div class="tab-link" onclick="openTab(event, 'tab-archive')">الأرشيف 📁</div>
-            <div class="tab-link" onclick="openTab(event, 'tab-settings')">إعدادات</div>
-        </div>
-
-        <div id="tab-items" class="tab-content active">
-            <input type="text" id="p-name" placeholder="اسم الطبق">
-            <input type="number" id="p-price" placeholder="السعر">
-            <input type="text" id="p-img" placeholder="رابط الصورة">
-            <select id="p-cat">
-                <option value="بيتزا">🍕 بيتزا</option><option value="برغر">🍔 برغر</option>
-                <option value="سندوتش">🥪 سندوتش</option><option value="مشروبات">🥤 مشروبات</option>
-            </select>
-            <button onclick="addProduct()" style="background:var(--main); color:white;">إضافة للمنيو +</button>
-        </div>
-
-        <div id="tab-drivers" class="tab-content">
-            <div id="live-drivers"></div>
-        </div>
-
-        <div id="tab-archive" class="tab-content">
-            <div id="archive-display"></div>
-            <button onclick="if(confirm('مسح الأرشيف؟')) db.ref('archive').remove()" style="background:var(--red); color:white;">تفريغ الأرشيف 🗑️</button>
-        </div>
-
-        <div id="tab-settings" class="tab-content">
-            <input type="text" id="admin-whatsapp" placeholder="رقم واتساب">
-            <input type="text" id="admin-new-pass" placeholder="تغيير كلمة السر">
-            <button onclick="saveAdminSettings()" style="background:var(--green);">حفظ 💾</button>
-        </div>
+    <div id="t1" class="tab active">
+        <div id="orders-list"></div>
     </div>
 
-    <h4 style="padding: 10px; color: var(--gold);">📦 الطلبات الواردة:</h4>
-    <div id="orders-display" style="padding: 10px;"></div>
+    <div id="t2" class="tab">
+        <input type="text" id="p-name" placeholder="الاسم">
+        <input type="number" id="p-price" placeholder="السعر">
+        <input type="text" id="p-img" placeholder="رابط الصورة">
+        <select id="p-cat">
+            <option value="بيتزا">بيتزا</option><option value="برغر">برغر</option><option value="سندوتش">سندوتش</option>
+        </select>
+        <select id="p-status">
+            <option value="normal">عادي</option><option value="new">NEW</option><option value="promo">PROMO</option>
+        </select>
+        <button onclick="addP()" style="width:100%; background:#ff6d00; padding:10px;">إضافة للمنيو</button>
+        <hr>
+        <div id="menu-list"></div>
+    </div>
+
+    <div id="t3" class="tab">
+        <div id="drivers-list"></div>
+    </div>
+
+    <div id="t4" class="tab">
+        <h3>تعديل RIP والواتساب والإعلان</h3>
+        <input type="text" id="set-rip" placeholder="رقم RIP">
+        <input type="text" id="set-wa" placeholder="رقم واتساب">
+        <input type="text" id="set-ads" placeholder="نص الإعلان">
+        <button onclick="saveSet()" style="width:100%; background:#2ecc71; padding:10px;">حفظ الإعدادات 💾</button>
+    </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    function checkAdminPass() {
-        db.ref('settings/admin_auth/pass').once('value', s => {
-            if(document.getElementById('admin-pass-input').value === s.val().toString()) {
-                document.getElementById('login-overlay').style.display = 'none';
-            } else { alert("خطأ!"); }
+    function showTab(id, btn) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    function saveSet() {
+        db.ref('settings').update({
+            rip_account: document.getElementById('set-rip').value,
+            whatsapp_number: document.getElementById('set-wa').value,
+            promo_text: document.getElementById('set-ads').value
+        }).then(() => alert("تم الحفظ!"));
+    }
+
+    function addP() {
+        db.ref('menu').push({
+            name: document.getElementById('p-name').value,
+            price: parseInt(document.getElementById('p-price').value),
+            img: document.getElementById('p-img').value,
+            category: document.getElementById('p-cat').value,
+            status: document.getElementById('p-status').value
         });
     }
 
-    function toggleAdmin() { const p = document.getElementById('admin-panel'); p.style.display = (p.style.display==='block')?'none':'block'; }
-    function openTab(evt, t) {
-        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-        document.querySelectorAll(".tab-link").forEach(l => l.classList.remove("active"));
-        document.getElementById(t).classList.add("active");
-        evt.currentTarget.classList.add("active");
-    }
-
-    function addProduct() {
-        const n = document.getElementById('p-name').value, p = document.getElementById('p-price').value, img = document.getElementById('p-img').value, c = document.getElementById('p-cat').value;
-        if(n && p) db.ref('menu').push({name:n, price:parseInt(p), img:img, category:c}).then(()=>alert("تم الإضافة ✅"));
-    }
-
-    let firstLoad = true;
+    // عرض الطلبات
     db.ref('orders').on('value', s => {
-        if(!firstLoad && s.exists()) { document.getElementById('notif-sound').play().catch(()=>{}); }
-        firstLoad = false;
-        const d = document.getElementById('orders-display'); d.innerHTML = "";
+        const l = document.getElementById('orders-list'); l.innerHTML = "";
         s.forEach(o => {
-            const v = o.val(); let items = ""; for(let k in v.items) items += `${v.items[k].name} (x${v.items[k].qty}) `;
-            d.innerHTML += `
-                <div class="order-box">
-                    <span style="float:left">${v.method === "كاش" ? "💵" : "💳"}</span>
-                    <b>👤 ${v.customer}</b> | <b style="color:var(--gold)">${v.total} DZD</b>
-                    <p style="font-size:12px; margin:5px 0;">📱 ${v.phone} | ${v.time}</p>
-                    <div style="background:#000; padding:8px; border-radius:8px; font-size:11px;">${items}</div>
-                    <div class="btn-group">
-                        <a href="tel:${v.phone}" class="btn-action" style="background:var(--green)">اتصال 📞</a>
-                        <a href="${v.location}" target="_blank" class="btn-action" style="background:#fff">الموقع 📍</a>
-                        <button onclick="db.ref('archive').push(${JSON.stringify(v)}).then(()=>db.ref('orders/${o.key}').remove())" class="btn-action" style="background:var(--red); color:#fff">أرشفة 🗑️</button>
-                    </div>
-                </div>`;
+            const v = o.val();
+            l.innerHTML += `<div class="order-card">
+                <b>${v.customer}</b> - ${v.total} DZD<br>
+                📱 ${v.phone} | 💳 ${v.method}<br>
+                <a href="${v.location}" target="_blank" style="color:cyan">الموقع 📍</a> | 
+                <button onclick="db.ref('archive').push(${JSON.stringify(v)}).then(()=>db.ref('orders/${o.key}').remove())" style="background:red; border:none; color:#fff;">أرشفة ✅</button>
+            </div>`;
         });
     });
 
+    // تتبع السائقين
     db.ref('drivers_live').on('value', s => {
-        const div = document.getElementById('live-drivers'); div.innerHTML = "";
+        const l = document.getElementById('drivers-list'); l.innerHTML = "";
         s.forEach(d => {
-            const v = d.val(); const link = v.lat ? `https://www.google.com/maps?q=${v.lat},${v.lng}` : v.location;
-            div.innerHTML += `<div class="driver-card"><b>🛵 ${v.name}</b><br><a href="${link}" target="_blank" style="color:var(--gold); font-size:12px;">تتبع الموقع المباشر 📍</a></div>`;
+            const v = d.val();
+            l.innerHTML += `<div class="order-card" style="border-color:green">
+                <b>السائق: ${v.name}</b><br>
+                <a href="${v.location}" target="_blank" style="color:green">مكانه الحالي 📍</a>
+            </div>`;
         });
     });
-
-    db.ref('archive').on('value', s => {
-        const div = document.getElementById('archive-display'); div.innerHTML = "";
-        s.forEach(o => { const v = o.val(); div.innerHTML += `<div class="order-box" style="opacity:0.6; font-size:11px;">${v.customer} - ${v.total} DZD - ${v.time}</div>`; });
-    });
-
-    function saveAdminSettings() {
-        const updates = {};
-        const wa = document.getElementById('admin-whatsapp').value, pass = document.getElementById('admin-new-pass').value;
-        if(wa) updates['whatsapp_number'] = wa; if(pass) updates['admin_auth/pass'] = pass;
-        db.ref('settings').update(updates).then(() => alert("تم الحفظ ✅"));
-    }
 </script>
 </body>
-</html>
+                                  </html>
