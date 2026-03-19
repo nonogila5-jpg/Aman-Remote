@@ -23,7 +23,7 @@
         .order-btn { background: var(--main); border: none; padding: 12px 25px; border-radius: 12px; color: #fff; font-weight: 900; font-family: 'Cairo'; cursor: pointer; }
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: #121212; padding: 20px; border-radius: 25px; width: 100%; border: 1px solid var(--main); max-width: 400px; max-height: 80vh; overflow-y: auto; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-family: 'Cairo'; box-sizing: border-box; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; font-family: 'Cairo'; box-sizing: border-box; }
         .gps-lock { color: var(--red); font-size: 12px; display: block; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
@@ -108,9 +108,9 @@
         navigator.geolocation.getCurrentPosition(
             pos => {
                 const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                // رابط خرائط جوجل الصحيح بدون أخطاء تنسيق
-                const gpsLink = "https://www.google.com/maps?q=" + lat + "," + lon;
+                const lng = pos.coords.longitude;
+                // رابط دقيق 100% يعمل على كافة الأنظمة
+                const gpsLink = "https://www.google.com/maps?q=" + lat + "," + lng;
                 
                 const orderData = { 
                     customer: n, phone: p, method: m, total: total, location: gpsLink, 
@@ -122,10 +122,9 @@
                 });
             }, 
             err => {
-                alert("❌ فشل الإرسال: يجب تفعيل الـ GPS والسماح بالوصول للموقع.");
+                alert("❌ خطأ: يجب السماح بالوصول للموقع (GPS) لإتمام الطلب.");
                 btn.disabled = false; btn.innerText = "تأكيد الطلب بموقعي 📍";
-            },
-            { enableHighAccuracy: true, timeout: 10000 }
+            }, { enableHighAccuracy: true, timeout: 10000 }
         );
     }
 
@@ -133,4 +132,4 @@
     function closeModals() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
 </script>
 </body>
-                </html>
+</html>
