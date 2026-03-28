@@ -225,6 +225,7 @@
             border-radius: 10px;
             font-size: 12px;
             text-align: center;
+            direction: ltr;
         }
         @media (max-width: 768px) {
             .menu-grid {
@@ -236,13 +237,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🍕 مطعم الأمان</h1>
+            <h1>🍕 معتمد الامتياز</h1>
             <p>أطيب البيتزا والسندويشات - توصيل سريع</p>
         </div>
 
-        <!-- إضافة معلومات للتصحيح -->
         <div class="debug-info" id="debugInfo">
-            🔧 جاري تحميل الصور...
+            🔧 جاري التحقق من الصور...
         </div>
 
         <div class="category-tabs" id="categoryTabs">
@@ -288,20 +288,16 @@
     </div>
 
     <script>
-        // ============================================================
-        // ✅ تم تحديث الرابط بناءً على موقعك: nonogila5-jpg.github.io/Aman-Remote/
-        // ============================================================
-        const GITHUB_USERNAME = "nonogila5-jpg";
-        const GITHUB_REPO = "Aman-Remote";
-        const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/`;
+        // رابط GitHub الصحيح
+        const GITHUB_BASE_URL = "https://raw.githubusercontent.com/nonogila5-jpg/Aman-Remote/main/";
         
         // عرض الرابط المستخدم للتصحيح
         document.getElementById('debugInfo').innerHTML = `
-            🔧 رابط تحميل الصور: ${GITHUB_BASE_URL}<br>
-            ✅ تم ضبط الرابط تلقائياً. إذا لم تظهر الصور، تأكد من أسماء الملفات في القائمة أدناه تطابق أسماء الصور في GitHub.
+            🔍 رابط تحميل الصور: <strong style="direction:ltr">${GITHUB_BASE_URL}</strong><br>
+            📸 إذا لم تظهر الصور، تأكد من وجود الملفات بهذه الأسماء في مستودع GitHub
         `;
         
-        // قائمة الأطباق مع أسماء الصور الموجودة في مستودعك
+        // ==================== قائمة الأطباق مع أسماء الصور المطابقة تماماً ====================
         const menu = [
             { 
                 id: 1, 
@@ -416,11 +412,17 @@
         }
 
         function getImageUrl(imageName) {
-            // ترميز اسم الملف للروابط (التعامل مع المسافات والأحرف الخاصة)
             const encodedImage = encodeURIComponent(imageName);
             const fullUrl = `${GITHUB_BASE_URL}${encodedImage}`;
-            console.log("تحميل صورة:", fullUrl);
+            console.log("📷 محاولة تحميل:", fullUrl);
             return fullUrl;
+        }
+
+        function testImageLoad(url, imageName) {
+            const img = new Image();
+            img.onload = () => console.log("✅ تم تحميل:", imageName);
+            img.onerror = () => console.log("❌ فشل تحميل:", imageName, url);
+            img.src = url;
         }
 
         function renderMenu() {
@@ -438,14 +440,18 @@
             filteredItems.forEach(item => {
                 const cartItem = cart.find(c => c.id === item.id);
                 const qty = cartItem ? cartItem.quantity : 0;
+                const imgUrl = getImageUrl(item.image);
+                
+                // اختبار تحميل الصورة
+                testImageLoad(imgUrl, item.image);
                 
                 const card = document.createElement('div');
                 card.className = 'pizza-card';
                 card.innerHTML = `
-                    <img src="${getImageUrl(item.image)}" 
+                    <img src="${imgUrl}" 
                          alt="${item.name}" 
                          class="food-image"
-                         onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=${encodeURIComponent(item.name)}'; console.log('❌ فشل تحميل: ${item.image}')">
+                         onerror="this.src='https://via.placeholder.com/300x200?text=${encodeURIComponent(item.name)}'; this.onerror=null;">
                     <div class="card-content">
                         <div class="pizza-name">${item.name}</div>
                         <div class="pizza-price">${item.price} دج</div>
@@ -576,5 +582,4 @@
             const payment = document.querySelector('input[name="payment"]:checked').value;
             
             if(!name || !phone || !address) {
-                alert('يرجى ملء جميع البيانات');
-                retu
+                alert('يرجى م
