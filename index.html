@@ -2,136 +2,579 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pizaza Salsabil</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>مطعم الأمان - زبون</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root { --main: #ff6d00; --dark: #0a0a0a; --card: #161616; --green: #00ff88; --gold: #ffd700; --red: #ff4444; }
-        body { font-family: 'Cairo', sans-serif; background: var(--dark); color: #fff; margin: 0; padding-bottom: 120px; }
-        .promo-bar { background: var(--main); color: #000; padding: 10px; font-weight: bold; overflow: hidden; white-space: nowrap; }
-        .promo-text { display: inline-block; animation: scroll-left 15s linear infinite; }
-        @keyframes scroll-left { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
-        .cat-title { margin: 20px 15px 10px; color: var(--main); font-weight: 900; border-right: 5px solid var(--main); padding-right: 12px; font-size: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .card { background: var(--card); border-radius: 20px; padding: 10px; position: relative; border: 1px solid #222; text-align: center; }
-        
-        /* إصلاح حجم الصورة لضمان الظهور */
-        .card img { width: 100%; height: 110px; border-radius: 15px; object-fit: cover; display: block; background: #222; margin-bottom: 8px; }
-        
-        .badge { position: absolute; top: 10px; left: 10px; padding: 4px 8px; border-radius: 8px; font-size: 10px; font-weight: bold; z-index: 5; }
-        .badge-new { background: var(--green); color: #000; }
-        .badge-promo { background: var(--red); color: #fff; }
-        .footer-cart { position: fixed; bottom: 0; width: 100%; background: rgba(10,10,10,0.95); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333; z-index: 1000; box-sizing: border-box; }
-        .order-btn { background: var(--main); border: none; padding: 12px 25px; border-radius: 12px; color: #fff; font-weight: 900; cursor: pointer; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: #121212; padding: 25px; border-radius: 25px; width: 100%; border: 1px solid var(--main); max-width: 400px; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .category-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .category-btn.active {
+            background: #e67e22;
+            color: white;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        .pizza-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        .pizza-card:hover {
+            transform: translateY(-5px);
+        }
+        .food-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f5f5f5;
+        }
+        .card-content {
+            padding: 20px;
+        }
+        .pizza-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .pizza-price {
+            font-size: 1.3rem;
+            color: #e67e22;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .quantity-control button {
+            background: #f0f0f0;
+            border: none;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .quantity-control button:hover {
+            background: #e67e22;
+            color: white;
+        }
+        .quantity-control span {
+            font-size: 1.3rem;
+            font-weight: bold;
+            min-width: 40px;
+            text-align: center;
+        }
+        .add-btn {
+            width: 100%;
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .add-btn:hover {
+            background: #d35400;
+        }
+        .cart-section {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .cart-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e67e22;
+            padding-bottom: 10px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .total-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e67e22;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        .input-group input:focus {
+            border-color: #e67e22;
+            outline: none;
+        }
+        .gps-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .payment-methods {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .payment-methods label {
+            flex: 1;
+            background: #f5f5f5;
+            padding: 10px;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .order-btn {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .clear-btn {
+            background: #95a5a6;
+            margin-top: 10px;
+        }
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .debug-info {
+            background: #fff3cd;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🍕 مطعم الأمان</h1>
+            <p>أطيب البيتزا والسندويشات - توصيل سريع</p>
+        </div>
 
-<div class="promo-bar"><div class="promo-text" id="ads-area">مرحباً بكم في Pizaza Salsabil - أطيب المأكولات!</div></div>
+        <!-- إضافة معلومات للتصحيح -->
+        <div class="debug-info" id="debugInfo">
+            🔧 جاري تحميل الصور...
+        </div>
 
-<div id="categories-wrapper"></div>
+        <div class="category-tabs" id="categoryTabs">
+            <button class="category-btn active" data-category="all">الكل</button>
+            <button class="category-btn" data-category="pizza">🍕 بيتزا</button>
+            <button class="category-btn" data-category="sandwich">🥪 سندويش</button>
+            <button class="category-btn" data-category="burger">🍔 برغر</button>
+        </div>
 
-<div class="footer-cart">
-    <div><small>الإجمالي</small><br><span style="color:var(--main); font-size:22px; font-weight:900;" id="total-val">0</span> DZD</div>
-    <button class="order-btn" onclick="openModal('order-modal')">إرسال الطلب 🚀</button>
-</div>
+        <div class="menu-grid" id="menuGrid"></div>
 
-<div id="order-modal" class="modal">
-    <div class="modal-content">
-        <h3>بيانات التوصيل 🚚</h3>
-        <input type="text" id="cust-name" placeholder="الاسم الكامل">
-        <input type="tel" id="cust-phone" placeholder="رقم الهاتف">
-        <select id="pay-method">
-            <option value="كاش">دفع نقداً (كاش)</option>
-            <option value="بريدي موب">بريدي موب</option>
-        </select>
-        <button id="main-btn" class="order-btn" style="width: 100%; margin-top: 10px;" onclick="processOrder()">تفعيل GPS وإرسال الطلب 📍</button>
-        <button onclick="closeModal()" style="background:none; border:none; color:#666; margin-top:10px;">إلغاء</button>
+        <div class="cart-section">
+            <h2>🛒 سلة الطلبات</h2>
+            <div id="cartItems"></div>
+            <div class="total-price" id="totalPrice">المجموع: 0 دج</div>
+            
+            <div class="input-group">
+                <input type="text" id="customerName" placeholder="الاسم الكامل" required>
+            </div>
+            <div class="input-group">
+                <input type="tel" id="customerPhone" placeholder="رقم الهاتف" required>
+            </div>
+            <button class="gps-btn" id="gpsBtn">
+                <i class="fas fa-map-marker-alt"></i> تحديد الموقع عبر GPS
+            </button>
+            <div class="input-group">
+                <input type="text" id="customerAddress" placeholder="العنوان" readonly>
+            </div>
+
+            <div class="payment-methods">
+                <label>
+                    <input type="radio" name="payment" value="cash" checked> 💵 كاش
+                </label>
+                <label>
+                    <input type="radio" name="payment" value="edahabia"> 💳 بريدي موب
+                </label>
+            </div>
+
+            <button class="order-btn" id="orderBtn">📦 تأكيد الطلب</button>
+            <button class="order-btn clear-btn" id="clearCartBtn">🗑️ إفراغ السلة</button>
+            <div id="feedback" class="feedback"></div>
+        </div>
     </div>
-</div>
 
-<div id="rip-modal" class="modal">
-    <div class="modal-content">
-        <h2 style="color:var(--green)">تم تسجيل طلبك! ✅</h2>
-        <p>يرجى تحويل المبلغ لـ (RIP):</p>
-        <div style="background:#000; padding:15px; border-radius:10px; color:var(--gold); font-size:20px; font-weight:900;" id="rip-val">جارِ التحميل...</div>
-        <button class="order-btn" style="background:#25D366; width:100%; margin-top:15px;" onclick="goToWhatsApp()">إرسال وصل التحويل (واتساب) 📸</button>
-    </div>
-</div>
+    <script>
+        // ============================================================
+        // ✅ تم تحديث الرابط بناءً على موقعك: nonogila5-jpg.github.io/Aman-Remote/
+        // ============================================================
+        const GITHUB_USERNAME = "nonogila5-jpg";
+        const GITHUB_REPO = "Aman-Remote";
+        const GITHUB_BASE_URL = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/`;
+        
+        // عرض الرابط المستخدم للتصحيح
+        document.getElementById('debugInfo').innerHTML = `
+            🔧 رابط تحميل الصور: ${GITHUB_BASE_URL}<br>
+            ✅ تم ضبط الرابط تلقائياً. إذا لم تظهر الصور، تأكد من أسماء الملفات في القائمة أدناه تطابق أسماء الصور في GitHub.
+        `;
+        
+        // قائمة الأطباق مع أسماء الصور الموجودة في مستودعك
+        const menu = [
+            { 
+                id: 1, 
+                name: "بيتزا مارغريتا", 
+                price: 650, 
+                category: "pizza",
+                image: "Pizza margarita.jpg",
+                description: "بيتزا كلاسيكية بصلصة الطماطم والموزاريلا"
+            },
+            { 
+                id: 2, 
+                name: "بيتزا 4 فورماج", 
+                price: 1100, 
+                category: "pizza",
+                image: "Pizzza 4 formage.jpg",
+                description: "أربعة أنواع من الجبن"
+            },
+            { 
+                id: 3, 
+                name: "بيتزا كوفيرت", 
+                price: 950, 
+                category: "pizza",
+                image: "Pizza couvert.jpg",
+                description: "بيتزا مغطاة بالخضار والجبن"
+            },
+            { 
+                id: 4, 
+                name: "بيتزا تون", 
+                price: 850, 
+                category: "pizza",
+                image: "Pizza thon.jpg",
+                description: "بيتزا بالتونة والزيتون"
+            },
+            { 
+                id: 5, 
+                name: "بيتزا فينديتشي", 
+                price: 900, 
+                category: "pizza",
+                image: "Pizza vindeache.jpg",
+                description: "بيتزا حارة بالسلامي"
+            },
+            { 
+                id: 6, 
+                name: "سندويش شاورما", 
+                price: 450, 
+                category: "sandwich",
+                image: "Sandwich shawarm....jpg",
+                description: "سندويش شاورما دجاج مع صلصة الثوم"
+            },
+            { 
+                id: 7, 
+                name: "سندويش فياند", 
+                price: 500, 
+                category: "sandwich",
+                image: "Sandwich viande.jpg",
+                description: "سندويش لحم مع خضار"
+            },
+            { 
+                id: 8, 
+                name: "سندويش فياند 2", 
+                price: 500, 
+                category: "sandwich",
+                image: "Sandwich viande2.jpg",
+                description: "سندويش لحم مشوي"
+            },
+            { 
+                id: 9, 
+                name: "سندويش بوله", 
+                price: 480, 
+                category: "sandwich",
+                image: "Sandwich poulet.jpg",
+                description: "سندويش دجاج مشوي"
+            },
+            { 
+                id: 10, 
+                name: "سندويش ميكست", 
+                price: 550, 
+                category: "sandwich",
+                image: "Sandwich mixte.jpg",
+                description: "سندويش مختلط (دجاج + لحم)"
+            },
+            { 
+                id: 11, 
+                name: "تاكوس", 
+                price: 600, 
+                category: "sandwich",
+                image: "Tacos.jpg",
+                description: "تاكوس فرنسي بالدجاج"
+            },
+            { 
+                id: 12, 
+                name: "برغر", 
+                price: 550, 
+                category: "burger",
+                image: "Burger.jpg",
+                description: "برغر لحم طازج مع خضار"
+            }
+        ];
 
-<script>
-    const firebaseConfig = { databaseURL: "https://aman-audoi-default-rtdb.firebaseio.com" };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+        let cart = [];
+        let currentCategory = "all";
 
-    let cart = {}; let total = 0; let settings = {};
-
-    db.ref('settings').on('value', s => { 
-        settings = s.val() || {}; 
-        if(settings.promo_text) document.getElementById('ads-area').innerText = settings.promo_text;
-        if(settings.rip_account) document.getElementById('rip-val').innerText = settings.rip_account;
-    });
-
-    db.ref('menu').on('value', snap => {
-        const data = snap.val(); 
-        const wrapper = document.getElementById('categories-wrapper');
-        wrapper.innerHTML = ""; 
-        if(!data) return;
-
-        let cats = {"بيتزا": [], "برغر": [], "سندوتش": []};
-        for(let id in data) { 
-            let c = data[id].category; 
-            if(cats[c]) cats[c].push({id, ...data[id]}); 
+        function loadCart() {
+            const saved = localStorage.getItem('restaurant_cart');
+            if(saved) cart = JSON.parse(saved);
+            renderCart();
+            renderMenu();
         }
 
-        for(let cName in cats) {
-            if(cats[cName].length === 0) continue;
-            let sectionHTML = `<div class="cat-title">${cName}</div><div class="grid" id="g-${cName}"></div>`;
-            wrapper.innerHTML += sectionHTML;
+        function saveCart() {
+            localStorage.setItem('restaurant_cart', JSON.stringify(cart));
+        }
 
-            cats[cName].forEach(i => {
-                let badge = i.status === 'new' ? '<div class="badge badge-new">NEW</div>' : (i.status === 'promo' ? '<div class="badge badge-promo">PROMO</div>' : '');
+        function getImageUrl(imageName) {
+            // ترميز اسم الملف للروابط (التعامل مع المسافات والأحرف الخاصة)
+            const encodedImage = encodeURIComponent(imageName);
+            const fullUrl = `${GITHUB_BASE_URL}${encodedImage}`;
+            console.log("تحميل صورة:", fullUrl);
+            return fullUrl;
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            const filteredItems = currentCategory === "all" 
+                ? menu 
+                : menu.filter(item => item.category === currentCategory);
+            
+            if(filteredItems.length === 0) {
+                grid.innerHTML = '<div style="text-align:center; padding:50px; background:white; border-radius:20px;">لا توجد أطباق في هذا القسم</div>';
+                return;
+            }
+            
+            grid.innerHTML = '';
+            filteredItems.forEach(item => {
+                const cartItem = cart.find(c => c.id === item.id);
+                const qty = cartItem ? cartItem.quantity : 0;
                 
-                // هنا الإصلاح: التأكد من وجود رابط الصورة أو وضع صورة افتراضية
-                let imageSrc = (i.img && i.img.trim() !== "") ? i.img : "https://via.placeholder.com/150?text=No+Image";
-
-                document.getElementById(`g-${cName}`).innerHTML += `
-                    <div class="card">
-                        ${badge}
-                        <img src="${imageSrc}" alt="${i.name}">
-                        <h4>${i.name}</h4>
-                        <div style="color:var(--gold)">${i.price} DZD</div>
-                        <button class="order-btn" style="width:100%; margin-top:10px;" onclick="add('${i.id}','${i.name}',${i.price})">إضافة +</button>
-                    </div>`;
+                const card = document.createElement('div');
+                card.className = 'pizza-card';
+                card.innerHTML = `
+                    <img src="${getImageUrl(item.image)}" 
+                         alt="${item.name}" 
+                         class="food-image"
+                         onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=${encodeURIComponent(item.name)}'; console.log('❌ فشل تحميل: ${item.image}')">
+                    <div class="card-content">
+                        <div class="pizza-name">${item.name}</div>
+                        <div class="pizza-price">${item.price} دج</div>
+                        <div style="color:#666; font-size:0.9rem; margin-bottom:10px;">${item.description}</div>
+                        <div class="quantity-control">
+                            <button onclick="updateQuantity(${item.id}, -1)">-</button>
+                            <span id="qty-${item.id}">${qty}</span>
+                            <button onclick="updateQuantity(${item.id}, 1)">+</button>
+                        </div>
+                        <button class="add-btn" onclick="addToCart(${item.id})">➕ أضف للسلة</button>
+                    </div>
+                `;
+                grid.appendChild(card);
             });
         }
-    });
 
-    function add(id, n, p) { if(!cart[id]) cart[id]={n,p,q:0}; cart[id].q++; total+=p; document.getElementById('total-val').innerText=total; }
+        function updateQuantity(id, delta) {
+            const existing = cart.find(c => c.id === id);
+            if(existing) {
+                existing.quantity += delta;
+                if(existing.quantity <= 0) {
+                    cart = cart.filter(c => c.id !== id);
+                }
+            } else if(delta > 0) {
+                const item = menu.find(m => m.id === id);
+                cart.push({ ...item, quantity: 1 });
+            }
+            saveCart();
+            renderCart();
+            renderMenu();
+        }
 
-    function processOrder() {
-        const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value, m = document.getElementById('pay-method').value;
-        if(!n || !p || total === 0) return alert("أكمل البيانات أولاً!");
-        const btn = document.getElementById('main-btn');
-        btn.disabled = true; btn.innerText = "جاري جلب الموقع... 📍";
-        navigator.geolocation.getCurrentPosition(pos => {
-            const gps = "https://www.google.com/maps?q=" + pos.coords.latitude + "," + pos.coords.longitude;
-            const order = { customer: n, phone: p, method: m, total: total, location: gps, items: cart, time: new Date().toLocaleString() };
-            db.ref('orders').push(order).then(() => {
-                if(m === "بريدي موب") openModal('rip-modal'); else { alert("تم الطلب بنجاح!"); location.reload(); }
+        function addToCart(id) {
+            updateQuantity(id, 1);
+            showFeedback('✅ تم إضافة الطبق للسلة', 'success');
+        }
+
+        function renderCart() {
+            const cartDiv = document.getElementById('cartItems');
+            if(cart.length === 0) {
+                cartDiv.innerHTML = '<p style="text-align:center; color:#999;">السلة فارغة</p>';
+                document.getElementById('totalPrice').innerHTML = 'المجموع: 0 دج';
+                return;
+            }
+            
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+                html += `
+                    <div class="cart-item">
+                        <span><strong>${item.name}</strong> x ${item.quantity}</span>
+                        <span>${subtotal} دج</span>
+                        <button onclick="removeItem(${item.id})" style="background:none; border:none; color:#e74c3c; cursor:pointer;">
+                            <i class="fas fa-trash"></i> رجوع
+                        </button>
+                    </div>
+                `;
             });
-        }, () => { alert("يجب تشغيل GPS!"); btn.disabled = false; btn.innerText = "تفعيل GPS وإرسال الطلب 📍"; }, {enableHighAccuracy:true});
-    }
+            cartDiv.innerHTML = html;
+            document.getElementById('totalPrice').innerHTML = `المجموع: ${total} دج`;
+        }
 
-    function goToWhatsApp() { window.open(`https://wa.me/${settings.whatsapp_number}?text=وصل طلب جديد بقيمة ${total} DZD`); location.reload(); }
-    function openModal(id) { document.getElementById(id).style.display='flex'; }
-    function closeModal() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
-</script>
-</body>
-    </html>
-    
+        function removeItem(id) {
+            const item = cart.find(c => c.id === id);
+            if(item) {
+                if(item.quantity > 1) {
+                    item.quantity--;
+                } else {
+                    cart = cart.filter(c => c.id !== id);
+                }
+                saveCart();
+                renderCart();
+                renderMenu();
+                showFeedback('🗑️ تم تعديل الكمية', 'info');
+            }
+        }
+
+        function showFeedback(msg, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerHTML = msg;
+            feedback.style.background = type === 'success' ? '#d4edda' : '#fff3cd';
+            feedback.style.color = type === 'success' ? '#155724' : '#856404';
+            setTimeout(() => {
+                feedback.innerHTML = '';
+            }, 2000);
+        }
+
+        // الفئات
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.category;
+                renderMenu();
+            });
+        });
+
+        // GPS
+        document.getElementById('gpsBtn').addEventListener('click', () => {
+            if(navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        const addressInput = document.getElementById('customerAddress');
+                        addressInput.value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        addressInput.setAttribute('data-lat', lat);
+                        addressInput.setAttribute('data-lng', lng);
+                        showFeedback('✅ تم تحديد موقعك بنجاح', 'success');
+                    },
+                    (err) => {
+                        alert('خطأ في تحديد الموقع: ' + err.message);
+                        document.getElementById('customerAddress').readOnly = false;
+                    }
+                );
+            } else {
+                alert('المتصفح لا يدعم تحديد الموقع');
+            }
+        });
+
+        // تأكيد الطلب
+        document.getElementById('orderBtn').addEventListener('click', () => {
+            const name = document.getElementById('customerName').value.trim();
+            const phone = document.getElementById('customerPhone').value.trim();
+            const address = document.getElementById('customerAddress').value.trim();
+            const payment = document.querySelector('input[name="payment"]:checked').value;
+            
+            if(!name || !phone || !address) {
+                alert('يرجى ملء جميع البيانات');
+                retu
